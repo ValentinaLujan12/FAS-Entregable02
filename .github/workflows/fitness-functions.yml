@@ -1,1 +1,35 @@
+# Gobernanza automatizada (Entregable 2, Sección 5; P09): cada push o pull request ejecuta las
+# fitness functions. Si alguna falla, el build queda en rojo; con la protección de la rama main,
+# el pull request no se puede fusionar.
+name: Fitness Functions
 
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  arquitectura:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Fitness functions (ArchUnit + JUnit), Checkstyle CC ≤ 10 y JaCoCo
+        run: mvn -B verify
+
+      - name: Publicar reportes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reportes-fitness-functions
+          path: |
+            target/surefire-reports/
+            target/site/jacoco/
+            target/checkstyle-result.xml
