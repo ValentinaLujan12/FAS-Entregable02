@@ -263,8 +263,8 @@
         <mxCell id="v63" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=10;fillColor=#eeeeee;strokeColor=#666666;strokeWidth=2;" value="&lt;div style=&#39;width:280px&#39;&gt;&lt;div style=&#39;text-align:center&#39;&gt;&lt;i style=&#39;font-size:9px&#39;&gt;«ValueObject / Snapshot»&lt;/i&gt;&lt;br&gt;&lt;b style=&#39;font-size:12px&#39;&gt;Carta&lt;/b&gt;&lt;/div&gt;&lt;hr size=&#39;1&#39; style=&#39;margin:3px 0&#39;&gt;+ palo: Palo&lt;br&gt;+ rango: Valor&lt;/div&gt;" vertex="1">
           <mxGeometry height="76" width="300" x="1580" y="552" as="geometry" />
         </mxCell>
-        <mxCell id="v64" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=10;fillColor=#eeeeee;strokeColor=#666666;strokeWidth=2;" value="&lt;div style=&#39;width:280px&#39;&gt;&lt;div style=&#39;text-align:center&#39;&gt;&lt;i style=&#39;font-size:9px&#39;&gt;«ValueObject / Snapshot»&lt;/i&gt;&lt;br&gt;&lt;b style=&#39;font-size:12px&#39;&gt;ParametrosModalidad&lt;/b&gt;&lt;/div&gt;&lt;hr size=&#39;1&#39; style=&#39;margin:3px 0&#39;&gt;+ acumulativa: boolean&lt;br&gt;+ umbral: Integer [0..1]&lt;br&gt;+ valorAs: int&lt;/div&gt;" vertex="1">
-          <mxGeometry height="91" width="300" x="1580" y="650" as="geometry" />
+        <mxCell id="v64" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fontSize=10;fillColor=#eeeeee;strokeColor=#666666;strokeWidth=2;" value="&lt;div style=&#39;width:280px&#39;&gt;&lt;div style=&#39;text-align:center&#39;&gt;&lt;i style=&#39;font-size:9px&#39;&gt;«ValueObject / Snapshot»&lt;/i&gt;&lt;br&gt;&lt;b style=&#39;font-size:12px&#39;&gt;ParametrosModalidad&lt;/b&gt;&lt;/div&gt;&lt;hr size=&#39;1&#39; style=&#39;margin:3px 0&#39;&gt;+ acumulativa: boolean&lt;br&gt;+ umbral: Integer [0..1]&lt;br&gt;+ valorAs: int&lt;br&gt;+ cartasPorJugador: int&lt;br&gt;+ cartaExtraInicial: boolean&lt;br&gt;+ numeroBarajas: int&lt;br&gt;+ comodines: int&lt;/div&gt;" vertex="1">
+          <mxGeometry height="146" width="300" x="1580" y="650" as="geometry" />
         </mxCell>
         <mxCell id="v65" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#777777;dashed=1;dashPattern=8 4;strokeWidth=1.5;" value="" vertex="1">
           <mxGeometry height="1218" width="1490" x="14" y="8" as="geometry" />
@@ -273,7 +273,7 @@
           <mxGeometry height="16" width="380" x="24" y="12" as="geometry" />
         </mxCell>
         <mxCell id="v67" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#777777;dashed=1;dashPattern=8 4;strokeWidth=1.5;" value="" vertex="1">
-          <mxGeometry height="749" width="328" x="1566" y="8" as="geometry" />
+          <mxGeometry height="804" width="328" x="1566" y="8" as="geometry" />
         </mxCell>
         <mxCell id="v68" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontSize=10;fontColor=#333333;strokeColor=none;fillColor=none;fontStyle=1;" value="«package» co.edu.unal.apuntado.kernel" vertex="1">
           <mxGeometry height="16" width="300" x="1576" y="12" as="geometry" />
