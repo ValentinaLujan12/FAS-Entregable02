@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+<!--
+  Fitness function FF-10 (Entregable 2, Sección 5.3): límite de complejidad ciclomática.
+  Ningún método puede superar CC = 10 (en particular, los evaluadores de combinaciones de rules).
+  La usan maven-checkstyle-plugin (fase verify / CI) y la prueba ComplejidadCiclomaticaFitnessTest.
+-->
+<module name="Checker">
+    <property name="charset" value="UTF-8"/>
+    <property name="severity" value="error"/>
+    <property name="fileExtensions" value="java"/>
+    <module name="TreeWalker">
+        <module name="CyclomaticComplexity">
+            <property name="max" value="10"/>
+            <property name="switchBlockAsSingleDecisionPoint" value="false"/>
+        </module>
+    </module>
+</module>
