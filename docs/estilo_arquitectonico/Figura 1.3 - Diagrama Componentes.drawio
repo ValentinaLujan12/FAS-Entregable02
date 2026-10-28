@@ -61,7 +61,7 @@
         <mxCell id="v20" parent="1" style="shape=module;jettyWidth=16;jettyHeight=8;align=left;spacingLeft=24;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffffff;strokeColor=#333333;strokeWidth=1.5;dashed=1;dashPattern=6 3;" value="&lt;i&gt;«external»&lt;/i&gt;&lt;br&gt;&lt;b&gt;Cliente Web / Móvil&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:9px&#39;&gt;(capa de presentación)&lt;/font&gt;" vertex="1">
           <mxGeometry height="70" width="170" x="120" y="40" as="geometry" />
         </mxCell>
-        <mxCell id="v21" parent="1" style="shape=module;jettyWidth=16;jettyHeight=8;align=left;spacingLeft=24;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=11;fillColor=#fffbe6;strokeColor=#333333;strokeWidth=1.5;" value="&lt;i&gt;«component»&lt;/i&gt;&lt;br&gt;&lt;b&gt;GatewayTiempoReal&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:9px&#39;&gt;WebSocket · difunde eventos&lt;/font&gt;" vertex="1">
+        <mxCell id="v21" parent="1" style="shape=module;jettyWidth=16;jettyHeight=8;align=left;spacingLeft=24;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=11;fillColor=#fffbe6;strokeColor=#333333;strokeWidth=1.5;" value="&lt;i&gt;«component»&lt;/i&gt;&lt;br&gt;&lt;b&gt;GatewayTiempoReal&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:9px&#39;&gt;WebSocket · difunde eventos&lt;br&gt;liga cada conexión a su JugadorId&lt;/font&gt;" vertex="1">
           <mxGeometry height="100" width="190" x="45" y="360" as="geometry" />
         </mxCell>
         <mxCell id="v22" parent="1" style="shape=module;jettyWidth=16;jettyHeight=8;align=left;spacingLeft=24;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=11;fillColor=#fffbe6;strokeColor=#333333;strokeWidth=1.5;" value="&lt;i&gt;«component»&lt;/i&gt;&lt;br&gt;&lt;b&gt;TemporizadorTurno&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:9px&#39;&gt;timer por turno · timeout&lt;/font&gt;" vertex="1">
@@ -747,6 +747,43 @@
         </mxCell>
         <mxCell id="v184" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontSize=10;fontColor=#000000;strokeColor=none;fillColor=none;" value="Dependencia «use» (hacia kernel)" vertex="1">
           <mxGeometry height="18" width="250" x="80" y="907" as="geometry" />
+        </mxCell>
+      
+        <mxCell id="n2" parent="1" style="rounded=0;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="12" width="12" x="954" y="514" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" edge="1" parent="1" style="endArrow=none;html=1;strokeWidth=1;dashed=1;dashPattern=4 3;strokeColor=#555555;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="954" y="520" as="sourcePoint" />
+            <mxPoint x="900" y="520" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="n4" edge="1" parent="1" style="endArrow=none;html=1;strokeWidth=1.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="966" y="520" as="sourcePoint" />
+            <mxPoint x="1203" y="520" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="n5" parent="1" style="shape=requiredInterface;html=1;strokeWidth=1.5;direction=west;" value="" vertex="1">
+          <mxGeometry height="22" width="10" x="1203" y="509" as="geometry" />
+        </mxCell>
+        <mxCell id="n6" parent="1" style="text;html=1;whiteSpace=wrap;align=right;verticalAlign=middle;fontSize=9;fontColor=#555555;strokeColor=none;fillColor=none;fontStyle=2;" value="pPuntos" vertex="1">
+          <mxGeometry height="14" width="56" x="896" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="n7" parent="1" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=9;fontColor=#555555;strokeColor=none;fillColor=none;" value="solo parametrosModalidad()&lt;br&gt;(barajar y repartir)" vertex="1">
+          <mxGeometry height="26" width="170" x="1000" y="493" as="geometry" />
+        </mxCell>
+        <mxCell id="n8" parent="1" style="shape=module;jettyWidth=16;jettyHeight=8;align=left;spacingLeft=24;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=11;fillColor=#fffbe6;strokeColor=#333333;strokeWidth=1.5;" value="&lt;i&gt;&amp;lt;&amp;lt;component&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;ProyectorVistaJugador&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:9px&#39;&gt;vista por jugador - lo usa el gateway&lt;/font&gt;" vertex="1">
+          <mxGeometry height="62" width="190" x="45" y="655" as="geometry" />
+        </mxCell>
+        <mxCell id="n9" parent="1" style="text;html=1;whiteSpace=wrap;align=right;verticalAlign=top;fontSize=8;fontColor=#555555;strokeColor=none;fillColor=none;" value="paquete .strategy.clasica" vertex="1">
+          <mxGeometry height="12" width="130" x="1455" y="227" as="geometry" />
+        </mxCell>
+        <mxCell id="n10" parent="1" style="text;html=1;whiteSpace=wrap;align=right;verticalAlign=top;fontSize=8;fontColor=#555555;strokeColor=none;fillColor=none;" value="paquete .strategy.apuntado" vertex="1">
+          <mxGeometry height="12" width="130" x="1455" y="302" as="geometry" />
+        </mxCell>
+        <mxCell id="n11" parent="1" style="text;html=1;whiteSpace=wrap;align=right;verticalAlign=top;fontSize=8;fontColor=#555555;strokeColor=none;fillColor=none;" value="paquete .strategy.(variante)" vertex="1">
+          <mxGeometry height="12" width="130" x="1455" y="377" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
