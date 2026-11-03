@@ -3,7 +3,7 @@
 Repositorio de código y modelos del **Entregable 2** de *Fundamentos de Arquitectura de Software* (UNAL, sede Medellín):
 **Sistema Digital de Juego de Cartas "El Apuntado"** (variante Clásica 4-3-3 y variante Apuntado a 101).
 
-Contiene lo que pide la guía (sección 7, pautas de entrega):
+sección 7, pautas de entrega:
 
 | Pauta | Dónde |
 |---|---|
