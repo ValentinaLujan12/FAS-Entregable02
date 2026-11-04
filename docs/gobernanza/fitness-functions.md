@@ -70,8 +70,8 @@ Una fitness function es cualquier mecanismo que entrega una evaluación objetiva
 | FF-25 | Serialización por partida; paralelismo entre partidas | Operacional; dinámica, holística, continua | JUnit 5 | Implementada |
 | FF-26 | Contrato AsyncAPI validado en CI | Estructural; estática, atómica, continua | AsyncAPI CLI | Especificada (E3) |
 | FF-27 | Las entidades no salen de persistence | Estructural; estática, atómica, continua | ArchUnit | Implementada |
-| FF-28 | La carta robada del mazo solo la ve quien roba (riesgo R7) | Operacional; dinámica, holística, continua | JUnit 5 | Implementada |
-| FF-29 | El jugador de cada comando lo fija la conexión autenticada, no el mensaje (riesgo R15) | Estructural y operacional; dinámica, atómica, continua | JUnit 5 | Especificada (E3) |
+| FF-28 | La carta robada del mazo solo la ve quien roba | Operacional; dinámica, holística, continua | JUnit 5 | Implementada |
+| FF-29 | El jugador de cada comando lo fija la conexión autenticada, no el mensaje | Estructural y operacional; dinámica, atómica, continua | JUnit 5 | Especificada (E3) |
 | FF-30 | Distancia a la secuencia principal D = abs(A + I - 1) ≤ 0,5 por módulo (Ejemplo 6-3); kernel con I = 0 | Estructural; estática, holística, continua | ArchUnit + JUnit 5 | Implementada |
 | FF-31 | Toda prueba tiene al menos una aserción y ninguna está deshabilitada (evita engañar la cobertura) | De proceso; estática, atómica, continua | JUnit 5 | Implementada |
 | FF-32 | Monitor en producción: p99 y máximo de validación, cálculo y notificación, con alerta si salen del modelo estadístico de la línea base | Operacional; dinámica, holística, periódica | Monitores (métricas del servidor) | Especificada (E3) |

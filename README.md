@@ -11,7 +11,7 @@ sección 7, pautas de entrega:
 | 2. ADRs 01 a 05 en `.md` | `docs/adrs/` |
 | 3. Fitness functions ejecutables | `tests/architecture/` |
 
-Además: análisis de riesgo (`docs/riesgos/`), catálogo de gobernanza (`docs/gobernanza/`) y el esqueleto Java del Monolito Modular que analizan las pruebas.
+Además: catálogo de gobernanza (`docs/gobernanza/`) y el esqueleto Java del Monolito Modular que analizan las pruebas.
 
 ## Cómo ejecutar las fitness functions
 
@@ -40,7 +40,6 @@ Desde el IDE (IntelliJ, VS Code o Eclipse) basta abrir el proyecto como proyecto
 |   |-- adrs/                                ADR-01 a ADR-05
 |   |-- estilo_arquitectonico/               Figura 1.3.1 (.drawio)
 |   |-- arquitectura_informacion/            Figuras 2.2.1, 2.2.2 y 2.3.1 (.drawio)
-|   |-- riesgos/risk-storming.md             Sección 4
 |   |-- gobernanza/fitness-functions.md      Sección 5
 |-- src/main/java/co/edu/unal/apuntado/
 |   |-- kernel/        Shared Kernel: Carta, Mano, ParametrosModalidad, snapshots...
@@ -76,8 +75,8 @@ Desde el IDE (IntelliJ, VS Code o Eclipse) basta abrir el proyecto como proyecto
 | G6 Extensibilidad por contrato | FF-11 a FF-14 | `ExtensibilidadReglasFitnessTest`, `Regla*ContratoFitnessTest`, `ConsistenciaModalidadesFitnessTest`, `AislamientoEntreModalidadesFitnessTest` |
 | G7 Calidad medible | FF-15, FF-16, FF-31 | JaCoCo (`pom.xml`), `LatenciaEvaluacionFitnessTest` (p99 y peor caso), `CalidadDePruebasFitnessTest` |
 | G8 Integridad del cierre | FF-20 (en memoria) | `ConsistenciaPuntajeFitnessTest` |
-| Riesgo R7 (privacidad) | FF-28 | `PrivacidadVistaJugadorFitnessTest` |
-| Riesgo R15 (identidad) | FF-29 | Especificada para el Entregable 3 |
+| Privacidad de la vista del jugador | FF-28 | `PrivacidadVistaJugadorFitnessTest` |
+| Identidad por conexión | FF-29 | Especificada para el Entregable 3 |
 
 FF-17 a FF-19, FF-21, FF-22 (sobre PostgreSQL real con Testcontainers), FF-26 (AsyncAPI), FF-29 (identidad por conexión) y FF-32 (monitor de producción) quedan especificadas para el Entregable 3. El catálogo completo está en `docs/gobernanza/fitness-functions.md`.
 
