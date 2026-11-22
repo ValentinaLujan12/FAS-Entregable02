@@ -1,0 +1,102 @@
+@startuml 02_componentes
+!include _estilo.iuml
+title El Apuntado - Componentes del Monolito Modular y sus interfaces (Entregable 2, Tabla 1.3.1; ADR-01, ADR-06)
+skinparam componentStyle uml2
+
+package "Cliente web (navegador)" {
+  [Pantallas: acceso, inicio, sala, mesa] as UI
+  [Red: POST /api/juego + aviso Realtime] as RED
+}
+
+package "Función de Vercel (una ejecución por petición)" {
+  package "serverless (raíz de composición)" {
+    [manejador HTTP\n(rutas, acceso, cabeceras)] as WEB
+    [Procesador\n(leer, aplicar, guardar, buzones)] as PROC
+  }
+  package "game" {
+    [TurnOrchestrator] as ORQ
+    [LobbyManager] as LOBBY
+    [PartidaEnCurso] as PART
+    interface IComandosJuego as ICMD
+  }
+  package "rules" {
+    interface IValidadorCierre as IVAL
+    interface ICalculadorPuntos as ICALC
+    interface IRegistroReglas as IREG
+    [RegistroReglas] as REG
+    [ReglaClasicaCuartaTerna\nReglaApuntado101Puntos] as ESTR
+    [HandEvaluator] as EVAL
+  }
+  package "scoring" {
+    interface IServicioPuntaje as IPUN
+    [RoundScoring] as SCO
+  }
+  package "deck" {
+    interface IMazo as IMAZO
+    [DeckManagement] as MAZO
+  }
+  package "player" {
+    interface IJugadores as IJUG
+    [PlayerRegistry] as JUG
+  }
+  package "infra" {
+    interface ITemporizadorTurno as ITIM
+    interface ICanalTiempoReal as ICAN
+    [ProgramadorVirtual] as PROG
+    [GatewayTiempoReal] as GW
+    [ProyectorVistaJugador\n(privacidad de la mano)] as VIS
+  }
+  package "persistence" {
+    interface IAlmacen as IALM
+    [SupabaseStateRepository] as SUP
+    [AlmacenMemoria] as MEM
+  }
+  package "kernel + estado (núcleo compartido)" {
+    [Carta, Mano, Marcador,\nParametrosModalidad, EventoJuego,\nEstadoPartida] as KER
+  }
+  package "extras (ADR-11)" {
+    [bots, cuentas, skins,\nreacciones, métricas\n(IMetricas)] as EXT
+  }
+}
+
+database "Supabase\nPostgreSQL + Realtime" as PG
+
+UI --> RED
+RED --> WEB : HTTPS POST /api/juego
+WEB --> PROC
+PROC --> ICMD : pComandos
+ICMD - ORQ
+ORQ --> LOBBY
+ORQ --> PART
+ORQ --> ITIM : pTimer
+PROG -up- ITIM
+ORQ --> VIS
+PART --> IREG
+IREG - REG
+PART --> IVAL : pValida
+PART --> IPUN : pPuntaje
+PART --> IMAZO : pMazo
+PART --> IJUG : pJugadores
+IPUN - SCO
+SCO --> ICALC : pPuntos
+ESTR -up- IVAL
+ESTR -up- ICALC
+REG ..> ESTR : crea por partida
+ESTR ..> EVAL
+IMAZO - MAZO
+IJUG - JUG
+PROC --> IALM : pDatos (escritura atómica)
+IALM - SUP
+IALM - MEM
+PROC --> ICAN : pCanal (después de guardar)
+GW -up- ICAN
+SUP --> PG : HTTPS RPC guardar_sala_atomica
+GW --> PG : difusión sala-<CODIGO>
+PG ..> RED : aviso "cambio" (sin datos del juego)
+WEB ..> EXT : compone (único punto)
+
+note bottom of ORQ
+  game usa rules, deck, player, scoring y persistence
+  SOLO por sus interfaces (regla game-usa-solo-contratos).
+end note
+@enduml

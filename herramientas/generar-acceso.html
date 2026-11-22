@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>Generar acceso - El Apuntado</title>
+<style>
+  :root { --papel:#fbf5ea; --papel2:#f4eadb; --linea:#dcc7a6; --tinta:#4a3a30; --tinta2:#7a6555; --terracota:#d88e70; --terracota-osc:#b0644a; --salvia:#5f8463; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: #e9d7b9; color: var(--tinta); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; display: flex; justify-content: center; padding: 32px 16px; }
+  main { width: 100%; max-width: 760px; background: var(--papel); border: 2px solid var(--linea); border-radius: 24px; padding: 28px 30px; box-shadow: 0 14px 34px rgba(90,64,44,.2); }
+  h1 { margin: 0 0 4px; font-size: 28px; }
+  p { margin: 6px 0; color: var(--tinta2); }
+  .fila { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin: 8px 0; }
+  input { font: inherit; padding: 10px 12px; border: 2px solid var(--linea); border-radius: 12px; background: #fffdf8; color: var(--tinta); min-width: 0; }
+  input:focus { outline: none; border-color: #4a8580; }
+  button { font: inherit; font-weight: 700; padding: 10px 16px; border-radius: 12px; border: 2px solid #b88b6a; background: var(--papel); color: var(--tinta); cursor: pointer; }
+  button.primario { background: var(--terracota); border-color: var(--terracota-osc); color: #fffaf1; }
+  button:disabled { opacity: .6; cursor: wait; }
+  .acciones { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0 6px; }
+  label { display: block; font-weight: 700; margin-top: 18px; }
+  textarea { width: 100%; font: 14px/1.4 ui-monospace, Consolas, monospace; padding: 10px 12px; border: 2px solid var(--linea); border-radius: 12px; background: #fffdf8; color: var(--tinta); resize: vertical; min-height: 70px; word-break: break-all; }
+  .ok { color: var(--salvia); font-weight: 700; min-height: 1.5em; }
+  .nota { font-size: 14px; background: var(--papel2); border-radius: 12px; padding: 10px 14px; margin-top: 18px; }
+  @media (max-width: 560px) { .fila { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Generar acceso</h1>
+  <p>Crea los valores de <b>ACCESO_USUARIOS</b> y <b>SECRETO_SESION</b> para Vercel. Todo se calcula en este navegador: nada se envía a internet y la contraseña nunca se guarda.</p>
+
+  <div id="filas"></div>
+  <div class="acciones">
+    <button type="button" id="agregar">Agregar otro usuario</button>
+    <button type="button" class="primario" id="generar">Generar</button>
+  </div>
+  <div class="ok" id="estado"></div>
+
+  <label for="salida-usuarios">ACCESO_USUARIOS</label>
+  <textarea id="salida-usuarios" readonly placeholder="Aparecerá aquí al pulsar Generar"></textarea>
+  <button type="button" data-copiar="salida-usuarios">Copiar</button>
+
+  <label for="salida-secreto">SECRETO_SESION</label>
+  <textarea id="salida-secreto" readonly></textarea>
+  <button type="button" data-copiar="salida-secreto">Copiar</button>
+  <button type="button" id="otro-secreto">Generar otro secreto</button>
+
+  <p class="nota">Formato: <code>usuario=pbkdf2-sha256$600000$sal$hash</code>. Varios usuarios van separados por punto y coma. El usuario no distingue mayúsculas. Contraseña de al menos 10 caracteres. Si cambias SECRETO_SESION, todas las sesiones abiertas se cierran.</p>
+</main>
+<script>
+  'use strict';
+  const ITER = 600000;
+  const b64url = (bytes) => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const filas = document.getElementById('filas');
+  const estado = document.getElementById('estado');
+
+  function agregarFila() {
+    const div = document.createElement('div');
+    div.className = 'fila';
+    div.innerHTML = '<input class="u" placeholder="Usuario (ej. equipo)" autocomplete="off" maxlength="40">' +
+      '<input class="c" type="password" placeholder="Contraseña" autocomplete="new-password">' +
+      '<button type="button" class="quitar" title="Quitar">Quitar</button>';
+    div.querySelector('.quitar').onclick = () => { if (filas.children.length > 1) div.remove(); };
+    filas.append(div);
+  }
+
+  async function hashear(contrasena) {
+    const sal = crypto.getRandomValues(new Uint8Array(16));
+    const clave = await crypto.subtle.importKey('raw', new TextEncoder().encode(contrasena.normalize('NFKC')), 'PBKDF2', false, ['deriveBits']);
+    const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: sal, iterations: ITER }, clave, 256);
+    return 'pbkdf2-sha256$' + ITER + '$' + b64url(sal) + '$' + b64url(new Uint8Array(bits));
+  }
+
+  function nuevoSecreto() {
+    document.getElementById('salida-secreto').value = b64url(crypto.getRandomValues(new Uint8Array(48)));
+  }
+
+  document.getElementById('agregar').onclick = agregarFila;
+  document.getElementById('otro-secreto').onclick = nuevoSecreto;
+  document.getElementById('generar').onclick = async (e) => {
+    const boton = e.currentTarget;
+    const lineas = [];
+    const vistos = new Set();
+    for (const f of filas.children) {
+      const u = f.querySelector('.u').value.trim().toLowerCase();
+      const c = f.querySelector('.c').value;
+      if (!u && !c) continue;
+      if (!/^[a-z0-9._-]{2,40}$/.test(u)) { estado.textContent = 'Usuario no válido: usa letras, números, punto, guion o guion bajo (2 a 40).'; return; }
+      if (c.length < 10) { estado.textContent = 'La contraseña de "' + u + '" debe tener al menos 10 caracteres.'; return; }
+      if (vistos.has(u)) { estado.textContent = 'El usuario "' + u + '" está repetido.'; return; }
+      vistos.add(u);
+      lineas.push([u, c]);
+    }
+    if (!lineas.length) { estado.textContent = 'Escribe al menos un usuario y su contraseña.'; return; }
+    boton.disabled = true;
+    estado.textContent = 'Calculando (puede tardar unos segundos)...';
+    try {
+      const partes = [];
+      for (const [u, c] of lineas) partes.push(u + '=' + (await hashear(c)));
+      document.getElementById('salida-usuarios').value = partes.join(';');
+      for (const f of filas.children) f.querySelector('.c').value = '';
+      estado.textContent = 'Listo. Copia los dos valores en Vercel (Settings, Environment Variables).';
+    } catch (err) {
+      estado.textContent = 'Este navegador no permitió el cálculo: ' + err;
+    } finally {
+      boton.disabled = false;
+    }
+  };
+  document.querySelectorAll('[data-copiar]').forEach((b) => {
+    b.onclick = async () => {
+      const t = document.getElementById(b.dataset.copiar);
+      try { await navigator.clipboard.writeText(t.value); } catch { t.select(); document.execCommand('copy'); }
+      estado.textContent = 'Copiado.';
+    };
+  });
+  agregarFila();
+  nuevoSecreto();
+</script>
+</body>
+</html>

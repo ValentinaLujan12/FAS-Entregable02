@@ -1,0 +1,523 @@
+asyncapi: 2.6.0
+defaultContentType: application/json
+info:
+  title: El Apuntado - Mensajes del juego
+  version: 2.0.0
+  description: |
+    Mensajes entre cliente y servidor. **El servidor es la única fuente de verdad**: el cliente envía
+    *intenciones* (`robar`, `descartar`, `cerrar`...) y renderiza las *vistas* que recibe.
+
+    Transporte en Vercel (sin conexiones persistentes):
+    - Cliente -> servidor: campo `msg` de `POST /api/juego` (ver `openapi.yaml`). Máx. 8 KiB.
+    - Servidor -> cliente: lista `mensajes` de la respuesta, cada uno `{ en, m }` con la hora a la que debe mostrarse.
+      Los mensajes para los demás jugadores quedan en su buzón y los reciben en su siguiente consulta (cada 1,5 s).
+    - Aviso opcional: difusión de Supabase Realtime en el canal `sala-<CODIGO>`, evento `cambio`, sin datos del juego;
+      solo indica al cliente que consulte ya.
+    - **Privacidad**: la vista `estado` solo contiene la mano de quien la recibe; las manos ajenas solo aparecen
+      en la liquidación. En `eventos`, las claves que empiezan con `_` son privadas y se eliminan para los demás.
+    - **Orden**: cada evento lleva `seq` creciente por sala; las peticiones de una sala se serializan con versión optimista.
+    - **Reconexión**: guardar `codigo` + `token` del mensaje `sesion`; el servidor reconoce al jugador en la siguiente consulta.
+servers:
+  local:
+    url: localhost:3000/api/juego
+    protocol: http
+    description: Desarrollo local (npm run dev)
+  produccion:
+    url: '{proyecto}.vercel.app/api/juego'
+    protocol: https
+    variables:
+      proyecto:
+        default: el-apuntado
+channels:
+  /api/juego:
+    description: Canal lógico único (peticiones HTTP con buzón).
+    publish:
+      operationId: enviarIntencion
+      summary: Cliente -> servidor
+      message:
+        oneOf:
+          - $ref: '#/components/messages/crear_sala'
+          - $ref: '#/components/messages/unirse'
+          - $ref: '#/components/messages/reconectar'
+          - $ref: '#/components/messages/configurar'
+          - $ref: '#/components/messages/agregar_bot'
+          - $ref: '#/components/messages/quitar_jugador'
+          - $ref: '#/components/messages/iniciar'
+          - $ref: '#/components/messages/robar'
+          - $ref: '#/components/messages/descartar'
+          - $ref: '#/components/messages/validar'
+          - $ref: '#/components/messages/cerrar'
+          - $ref: '#/components/messages/continuar'
+          - $ref: '#/components/messages/nueva_partida'
+          - $ref: '#/components/messages/salir'
+          - $ref: '#/components/messages/cuenta_abrir'
+          - $ref: '#/components/messages/cuenta_comprar'
+          - $ref: '#/components/messages/cuenta_activar'
+          - $ref: '#/components/messages/cuenta_recargar'
+          - $ref: '#/components/messages/reaccion'
+          - $ref: '#/components/messages/silenciar'
+          - $ref: '#/components/messages/iniciar_expulsion'
+          - $ref: '#/components/messages/votar'
+          - $ref: '#/components/messages/retomar'
+          - $ref: '#/components/messages/ping'
+    subscribe:
+      operationId: recibirDelServidor
+      summary: Servidor -> cliente
+      message:
+        oneOf:
+          - $ref: '#/components/messages/sesion'
+          - $ref: '#/components/messages/estado'
+          - $ref: '#/components/messages/eventos'
+          - $ref: '#/components/messages/validacion'
+          - $ref: '#/components/messages/cuenta'
+          - $ref: '#/components/messages/reaccion_difundida'
+          - $ref: '#/components/messages/error'
+          - $ref: '#/components/messages/pong'
+components:
+  messages:
+    crear_sala:
+      summary: Crea una sala; quien crea es el host
+      payload:
+        type: object
+        required: [t, nombre, modalidad]
+        properties:
+          t: { const: crear_sala }
+          nombre: { type: string, minLength: 1, maxLength: 40 }
+          modalidad: { $ref: '#/components/schemas/ModalidadId' }
+          parametros: { $ref: '#/components/schemas/ParametrosParciales' }
+      examples:
+        - payload: { t: crear_sala, nombre: Luis, modalidad: APUNTADO }
+    unirse:
+      summary: Entra a una sala en ESPERA con su código
+      payload:
+        type: object
+        required: [t, codigo, nombre]
+        properties:
+          t: { const: unirse }
+          codigo: { type: string, maxLength: 8 }
+          nombre: { type: string, maxLength: 40 }
+    reconectar:
+      summary: Recupera la sesión tras una caída (CU-04)
+      payload:
+        type: object
+        required: [t, codigo, token]
+        properties:
+          t: { const: reconectar }
+          codigo: { type: string, maxLength: 8 }
+          token: { type: string, maxLength: 100 }
+    configurar:
+      summary: Solo host, solo en ESPERA
+      payload:
+        type: object
+        required: [t]
+        properties:
+          t: { const: configurar }
+          modalidad: { $ref: '#/components/schemas/ModalidadId' }
+          parametros: { $ref: '#/components/schemas/ParametrosParciales' }
+    agregar_bot:
+      summary: Solo host, solo en ESPERA
+      payload: { type: object, required: [t], properties: { t: { const: agregar_bot } } }
+    quitar_jugador:
+      summary: Solo host, solo en ESPERA
+      payload:
+        type: object
+        required: [t, jugadorId]
+        properties:
+          t: { const: quitar_jugador }
+          jugadorId: { type: string, maxLength: 40 }
+    iniciar:
+      summary: Solo host; reparte y comienza (≥ minJugadores)
+      payload: { type: object, required: [t], properties: { t: { const: iniciar } } }
+    robar:
+      summary: Fase ROBAR del turno propio
+      payload:
+        type: object
+        required: [t, origen]
+        properties:
+          t: { const: robar }
+          origen: { type: string, enum: [MAZO, POZO] }
+    descartar:
+      summary: Fase DESCARTAR del turno propio; cede el turno
+      payload:
+        type: object
+        required: [t, cartaId]
+        properties:
+          t: { const: descartar }
+          cartaId: { type: string, maxLength: 12, example: 10H#0 }
+    validar:
+      summary: Consulta sin efectos - ¿estas cartas forman GRUPO o ESCALERA?
+      payload:
+        type: object
+        required: [t, cartaIds]
+        properties:
+          t: { const: validar }
+          cartaIds: { type: array, maxItems: 12, items: { type: string, maxLength: 12 } }
+    cerrar:
+      summary: Intenta cerrar la ronda con la mano de 11 cartas (fase DESCARTAR)
+      payload: { type: object, required: [t], properties: { t: { const: cerrar } } }
+    continuar:
+      summary: Salta la pausa de liquidación
+      payload: { type: object, required: [t], properties: { t: { const: continuar } } }
+    nueva_partida:
+      summary: Revancha; solo host, tras FINALIZADA
+      payload: { type: object, required: [t], properties: { t: { const: nueva_partida } } }
+    salir:
+      summary: Abandona la sala (en curso -> un bot termina su mano)
+      payload: { type: object, required: [t], properties: { t: { const: salir } } }
+    cuenta_abrir:
+      summary: Abre (o crea) la cuenta ANÓNIMA temporal. MOCKUP de las cuentas reales.
+      description: >
+        Sin `clave` el servidor crea el perfil (saldo inicial, inventario vacío, skins básicas elegidas) y responde `cuenta` con la
+        `clave` generada: el navegador la guarda (`localStorage: apuntado.clave`). Con `clave` reabre la cuenta existente. El servidor
+        solo guarda el hash SHA-256 de la clave. No hay registro ni contraseña.
+      payload:
+        type: object
+        required: [t]
+        properties:
+          t: { const: cuenta_abrir }
+          clave: { type: string, maxLength: 80 }
+    cuenta_comprar:
+      summary: PIDE comprar una skin premium (el servidor decide). Comprar implica elegirla.
+      description: >
+        El cliente NUNCA es fuente de verdad: solo pide. El servidor valida el id, descuenta el saldo, añade la skin al inventario y la
+        activa. Errores: `SKIN_INVALIDA`, `YA_LA_TIENES`, `SALDO_INSUFICIENTE`, `SIN_CUENTA`. Responde `cuenta` con el estado nuevo.
+      payload:
+        type: object
+        required: [t, tipo, id]
+        properties:
+          t: { const: cuenta_comprar }
+          tipo: { type: string, enum: [carta, mesa, ambiente, celebracion] }
+          id: { type: string, maxLength: 40 }
+    cuenta_activar:
+      summary: PIDE usar una skin que ya posee (básica o comprada)
+      description: >
+        Si no la posee -> `ACCION_NO_PERMITIDA`. Cartas, mesa premium y celebración se copian a la sala solo fuera de la partida en
+        curso (el estilo de la mesa no cambia a mitad de partida); el ambiente es local.
+      payload:
+        type: object
+        required: [t, tipo, id]
+        properties:
+          t: { const: cuenta_activar }
+          tipo: { type: string, enum: [carta, mesa, ambiente, celebracion] }
+          id: { type: string, maxLength: 40 }
+    cuenta_recargar:
+      summary: TEMPORAL (mockup). Pide la recarga de tokens de pruebas
+      description: Solo si `recarga.activa` en el catálogo; si no, `RECARGA_NO_DISPONIBLE`. En el sistema real se reemplaza por "Comprar monedas".
+      payload: { type: object, required: [t], properties: { t: { const: cuenta_recargar } } }
+    reaccion:
+      summary: Reacción rápida (chat básico SIN texto libre)
+      description: >
+        `id` debe existir en el catálogo `src/extras/reacciones/reacciones.ts` (si no, `REACCION_INVALIDA`). Antirrebote de 1,2 s por jugador y
+        silencio si la mesa lo silenció (`SILENCIADO`). El servidor difunde `reaccion` solo a quienes no lo silenciaron.
+      payload:
+        type: object
+        required: [t, id]
+        properties:
+          t: { const: reaccion }
+          id: { type: string, example: sarcasmo }
+    silenciar:
+      summary: Silencia (o deja de silenciar) las reacciones de un jugador
+      description: >
+        Efecto individual inmediato. Además, si ⌈humanos activos / 2⌉ jugadores silencian a alguien, queda silenciado para TODOS
+        (`JugadorVista.silenciado`). Un jugador no puede silenciarse a sí mismo.
+      payload:
+        type: object
+        required: [t, jugadorId, activo]
+        properties:
+          t: { const: silenciar }
+          jugadorId: { type: string }
+          activo: { type: boolean }
+    iniciar_expulsion:
+      summary: Abre la votación de expulsión de un jugador ausente
+      description: >
+        Solo cuando el servidor marcó `JugadorVista.expulsionDisponible` para ese objetivo (varios turnos en automático) y no hay otra
+        votación. Quien la inicia vota a favor. La votación NUNCA se abre sola.
+      payload:
+        type: object
+        required: [t, objetivoId]
+        properties:
+          t: { const: iniciar_expulsion }
+          objetivoId: { type: string }
+    votar:
+      summary: Voto (sí/no) en la votación de expulsión abierta
+      description: >
+        Pueden votar los humanos conectados, no eliminados, que no estén en piloto/automático, excepto el acusado.
+        Mayoría = floor(N/2)+1 de los elegibles. Un voto repetido o fuera de lugar -> `ACCION_NO_PERMITIDA`.
+      payload:
+        type: object
+        required: [t, aFavor]
+        properties:
+          t: { const: votar }
+          aFavor: { type: boolean }
+    retomar:
+      summary: 'Estoy aquí: sale de piloto o automático y cancela las votaciones en su contra'
+      payload: { type: object, required: [t], properties: { t: { const: retomar } } }
+    ping:
+      payload: { type: object, required: [t], properties: { t: { const: ping } } }
+    sesion:
+      summary: Credenciales tras crear_sala / unirse / reconectar
+      payload:
+        type: object
+        required: [t, codigo, jugadorId, token]
+        properties:
+          t: { const: sesion }
+          codigo: { type: string }
+          jugadorId: { type: string }
+          token: { type: string, description: Secreto del jugador; el servidor solo guarda su hash SHA-256. }
+    estado:
+      summary: Vista completa de la mesa, proyectada para el receptor
+      payload:
+        type: object
+        required: [t, vista]
+        properties:
+          t: { const: estado }
+          vista: { $ref: '#/components/schemas/VistaMesa' }
+    eventos:
+      summary: Lote de eventos públicos (animación + bitácora)
+      payload:
+        type: object
+        required: [t, eventos]
+        properties:
+          t: { const: eventos }
+          eventos: { type: array, items: { $ref: '#/components/schemas/EventoJuego' } }
+    validacion:
+      summary: Respuesta a `validar`
+      payload:
+        type: object
+        required: [t, valida, mensaje, cartaIds]
+        properties:
+          t: { const: validacion }
+          valida: { type: boolean }
+          tipo: { type: string, enum: [GRUPO, ESCALERA] }
+          mensaje: { type: string }
+          cartaIds: { type: array, items: { type: string } }
+    error:
+      payload:
+        type: object
+        required: [t, codigo, mensaje]
+        properties:
+          t: { const: error }
+          codigo:
+            type: string
+            description: Código estable para la interfaz; `mensaje` es texto legible en español.
+            enum:
+              - MENSAJE_INVALIDO
+              - DEMASIADOS_MENSAJES
+              - FASE_INVALIDA
+              - NO_ES_TU_TURNO
+              - ACCION_NO_PERMITIDA
+              - CARTA_NO_ENCONTRADA
+              - POZO_VACIO
+              - JUGADOR_ELIMINADO
+              - DEVOLUCION_PROHIBIDA
+              - PARAMETROS_INVALIDOS
+              - MAZO_INSUFICIENTE
+              - NOMBRE_INVALIDO
+              - MODALIDAD_INVALIDA
+              - SALA_INEXISTENTE
+              - SALA_LLENA
+              - PARTIDA_EN_CURSO
+              - NOMBRE_DUPLICADO
+              - TOKEN_INVALIDO
+              - SOLO_HOST
+              - JUGADOR_INEXISTENTE
+              - ESTADO_INVALIDO
+              - SIN_SESION
+              - SIN_CUENTA
+              - SKIN_INVALIDA
+              - YA_LA_TIENES
+              - SALDO_INSUFICIENTE
+              - RECARGA_NO_DISPONIBLE
+              - REACCION_INVALIDA
+              - SILENCIADO
+              - EXPULSADO
+          mensaje: { type: string }
+    cuenta:
+      summary: Estado de MI cuenta (saldo, inventario, skins elegidas). Solo al dueño.
+      payload:
+        type: object
+        required: [t, cuenta]
+        properties:
+          t: { const: cuenta }
+          clave: { type: string, description: Solo al crear la cuenta; el navegador la guarda. }
+          cuenta:
+            type: object
+            required: [saldo, inventario, elegidas, recargaDisponible]
+            properties:
+              saldo: { type: integer }
+              inventario: { type: array, items: { type: string }, description: Skins PREMIUM compradas (las básicas son de todos). }
+              elegidas: { type: object, additionalProperties: { type: string }, description: 'Una por tipo: carta, mesa, ambiente, celebracion.' }
+              recargaDisponible: { type: boolean }
+    reaccion_difundida:
+      summary: Una reacción de otro jugador (o mía), ya filtrada por silencios
+      payload:
+        type: object
+        required: [t, jugadorId, id, ts]
+        properties:
+          t: { const: reaccion }
+          jugadorId: { type: string }
+          id: { type: string }
+          ts: { type: integer }
+    pong:
+      payload:
+        type: object
+        required: [t, ahora]
+        properties:
+          t: { const: pong }
+          ahora: { type: integer, description: Reloj del servidor (epoch ms). }
+  schemas:
+    ModalidadId: { type: string, enum: [CLASICA, APUNTADO] }
+    ParametrosParciales:
+      type: object
+      description: El servidor sanea y acota cada valor; lo no permitido vuelve al valor por defecto de la modalidad.
+      properties:
+        mazos: { oneOf: [{ type: string, enum: [AUTO] }, { type: integer, enum: [1, 2] }] }
+        comodines: { type: integer, enum: [0, 2, 4] }
+        valorAs: { type: integer, enum: [1, 10, 11] }
+        aceEscalera: { type: string, enum: [BAJO, ALTO, AMBOS] }
+        tiempoTurnoSeg: { type: integer, minimum: 10, maximum: 300 }
+        permitirRoboPozo: { type: boolean }
+        permitirCierreConSobrante: { type: boolean, description: 'Solo Apuntado 101. Por defecto true.' }
+        cuartaCuentaComoTerna: { type: boolean, description: 'Solo Apuntado 101 con sobrante: una cuarta o quinta cuenta como una de las 3 combinaciones. Por defecto true; false = exactamente 3 ternas.' }
+        victoriasObjetivo: { type: integer, minimum: 1, maximum: 20 }
+        umbralEliminacion: { type: integer, minimum: 20, maximum: 1000 }
+        rondasMax: { type: integer, nullable: true }
+        pausaLiquidacionSeg: { type: integer, minimum: 3, maximum: 120 }
+    Carta:
+      type: object
+      required: [id, valor, pinta, esComodin]
+      properties:
+        id: { type: string, example: 10H#0 }
+        valor: { type: string, enum: [A, '2', '3', '4', '5', '6', '7', '8', '9', '10', J, Q, K, JK] }
+        pinta: { type: string, nullable: true, enum: [H, D, C, S] }
+        esComodin: { type: boolean }
+    JugadorVista:
+      type: object
+      required: [id, nombre, esBot, conectado, autopiloto, automatico, saltos, eliminado, esHost, skinCartas, mesaPremium, celebracion, silenciado, silenciadoPorMi, expulsionDisponible, asiento, numCartas, puntos, victorias]
+      properties:
+        id: { type: string }
+        nombre: { type: string }
+        esBot: { type: boolean }
+        conectado: { type: boolean }
+        autopiloto: { type: boolean, description: 'Piloto: 2 turnos vencidos seguidos. Solo etiqueta; su turno espera el reloj completo.' }
+        automatico: { type: boolean, description: 'Automático completo (por votación): un bot juega por él al instante hasta que retome.' }
+        saltos: { type: integer, description: Turnos saltados seguidos (vencidos + jugados en automático). }
+        skinCartas: { type: string, description: Skin de cartas; la ven todos. }
+        celebracion: { type: string, description: Skin de celebración; la ven todos cuando este jugador gana. }
+        silenciado: { type: boolean, description: Silenciado para TODOS (⌈activos/2⌉ lo silenciaron). }
+        silenciadoPorMi: { type: boolean, description: Yo lo silencié. }
+        expulsionDisponible: { type: boolean, description: Tras varios turnos en automático; cualquiera puede abrir la votación con `iniciar_expulsion`. }
+        mesaPremium: { type: string, nullable: true, description: Mesa premium elegida; las básicas nunca se comparten. }
+        eliminado: { type: boolean }
+        esHost: { type: boolean }
+        asiento: { type: integer }
+        numCartas: { type: integer }
+        puntos: { type: integer }
+        victorias: { type: integer }
+    VotacionVista:
+      type: object
+      required: [id, tipo, objetivoId, venceEn, elegibles, necesarios, aFavor, enContra, miVoto, puedoVotar]
+      description: >
+        Solo existe la votación de EXPULSIÓN. Tras >3 turnos saltados el jugador pasa a automático SIN votar; si sigue ausente 3 turnos
+        más, `expulsionDisponible` y el evento EXPULSION_DISPONIBLE avisan; la votación se abre solo cuando alguien pulsa el botón
+        (`iniciar_expulsion`). Tras un rechazo hay 2 saltos de enfriamiento.
+      properties:
+        id: { type: integer }
+        tipo: { type: string, enum: [EXPULSION] }
+        objetivoId: { type: string }
+        venceEn: { type: integer, description: Epoch ms del servidor. }
+        elegibles: { type: integer }
+        necesarios: { type: integer, description: floor(elegibles/2)+1 }
+        aFavor: { type: integer }
+        enContra: { type: integer }
+        miVoto: { type: boolean, nullable: true }
+        puedoVotar: { type: boolean }
+    TurnoVista:
+      type: object
+      required: [jugadorId, fase, venceEn, turnoN]
+      properties:
+        jugadorId: { type: string }
+        fase: { type: string, enum: [ROBAR, DESCARTAR] }
+        venceEn: { type: integer, description: Epoch ms del servidor. }
+        turnoN: { type: integer }
+    CombinacionVista:
+      type: object
+      required: [tipo, cartas]
+      properties:
+        tipo: { type: string, enum: [GRUPO, ESCALERA] }
+        cartas: { type: array, items: { $ref: '#/components/schemas/Carta' } }
+    LiquidacionVista:
+      type: object
+      properties:
+        ronda: { type: integer }
+        tablas: { type: boolean }
+        ganadorId: { type: string, nullable: true }
+        tipoCierre: { type: string, nullable: true }
+        detalle: { type: string }
+        eliminadosAhora: { type: array, items: { type: string } }
+        siguienteEn: { type: integer, nullable: true, description: Epoch ms de la siguiente ronda; null si terminó la partida. }
+        jugadores:
+          type: array
+          items:
+            type: object
+            properties:
+              jugadorId: { type: string }
+              combinaciones: { type: array, items: { $ref: '#/components/schemas/CombinacionVista' } }
+              sobrantes: { type: array, items: { $ref: '#/components/schemas/Carta' } }
+              puntosSobrantes: { type: integer }
+              delta: { type: integer }
+              acumulado: { type: integer }
+              victorias: { type: integer }
+              eliminado: { type: boolean }
+    FinalVista:
+      type: object
+      properties:
+        ganadorId: { type: string }
+        motivo: { type: string }
+        posiciones:
+          type: array
+          items:
+            type: object
+            properties:
+              jugadorId: { type: string }
+              posicion: { type: integer }
+              puntos: { type: integer }
+              victorias: { type: integer }
+    VistaMesa:
+      type: object
+      required: [codigo, modalidad, parametros, fase, yoId, hostId, jugadores, ronda, mano, mazoRestantes, pozo, mazosEnJuego, ahora]
+      properties:
+        codigo: { type: string }
+        modalidad: { $ref: '#/components/schemas/ModalidadId' }
+        parametros: { type: object, additionalProperties: true, description: 'Ver ParametrosModalidad en openapi.yaml.' }
+        fase: { type: string, enum: [ESPERA, EN_CURSO, LIQUIDACION, FINALIZADA] }
+        yoId: { type: string }
+        hostId: { type: string }
+        jugadores: { type: array, items: { $ref: '#/components/schemas/JugadorVista' } }
+        ronda: { type: integer }
+        turno: { allOf: [{ $ref: '#/components/schemas/TurnoVista' }], nullable: true }
+        mano: { type: array, items: { $ref: '#/components/schemas/Carta' }, description: Solo las cartas del receptor. }
+        mazoRestantes: { type: integer }
+        pozo:
+          type: object
+          properties:
+            tope: { allOf: [{ $ref: '#/components/schemas/Carta' }], nullable: true }
+            cantidad: { type: integer }
+        mazosEnJuego: { type: integer }
+        liquidacion: { allOf: [{ $ref: '#/components/schemas/LiquidacionVista' }], nullable: true }
+        final: { allOf: [{ $ref: '#/components/schemas/FinalVista' }], nullable: true }
+        votacion: { allOf: [{ $ref: '#/components/schemas/VotacionVista' }], nullable: true }
+        ahora: { type: integer, description: Reloj del servidor al generar la vista (corrige desfase del cliente). }
+    EventoJuego:
+      type: object
+      required: [seq, tipo, ronda, ts, datos]
+      properties:
+        seq: { type: integer }
+        tipo:
+          type: string
+          enum: [SALA_ACTUALIZADA, PARTIDA_INICIADA, RONDA_INICIADA, TURNO_INICIADO, CARTA_ROBADA, CARTA_DESCARTADA, TURNO_EXPIRADO, CIERRE_RECHAZADO, CIERRE_ACEPTADO, MAZO_RECICLADO, RONDA_TABLAS, RONDA_LIQUIDADA, JUGADOR_ELIMINADO, PARTIDA_FINALIZADA, AUTOPILOTO, AUTOMATICO, EXPULSION_DISPONIBLE, VOTACION_ABIERTA, VOTACION_CERRADA, JUGADOR_EXPULSADO]
+          description: METRICA_LATENCIA existe solo en la base de datos (extra de métricas) y nunca se envía a los clientes.
+        ronda: { type: integer }
+        ts: { type: integer }
+        partida: { type: integer, description: Número de partida dentro de la sala (revanchas) }
+        datos: { type: object, additionalProperties: true }

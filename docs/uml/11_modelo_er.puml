@@ -1,0 +1,92 @@
+@startuml 11_modelo_er
+!include _estilo.iuml
+title Modelo de datos (Supabase / PostgreSQL) - supabase/esquema.sql
+hide circle
+skinparam linetype ortho
+
+entity sala {
+  * codigo : TEXT <<PK>>  "^[A-Z0-9]{3,8}$"
+  --
+  datos : JSONB  "sala + snapshot de la partida + extras\n+ presentes + reloj virtual"
+  version : INTEGER  "control optimista"
+  proximo_en : BIGINT  "próximo plazo (ms)"
+  actualizada_en : TIMESTAMPTZ
+}
+entity presencia {
+  * codigo : TEXT <<PK,FK>>
+  * jugador_id : TEXT <<PK>>
+  --
+  visto_en : BIGINT  "último latido (ms)"
+}
+entity buzon {
+  * id : BIGINT <<PK, identidad>>
+  --
+  codigo : TEXT <<FK>>
+  jugador_id : TEXT  "o huella del token si ya no tiene asiento"
+  en : BIGINT  "hora de envío (ms)"
+  mensaje : JSONB
+}
+entity cuenta {
+  * clave_hash : TEXT <<PK>>  "SHA-256 de la clave anónima"
+  --
+  id : TEXT
+  saldo : INTEGER  ">= 0"
+  inventario : JSONB
+  elegidas : JSONB
+  creada_en : TIMESTAMPTZ
+}
+entity limite {
+  * clave : TEXT <<PK>>  "HMAC anónimo, nunca la IP"
+  --
+  desde : TIMESTAMPTZ
+  conteo : INTEGER
+}
+
+entity evento {
+  * id : BIGINT <<PK, identidad>>
+  --
+  codigo : TEXT <<FK>>
+  tipo : TEXT  "CIERRE_ACEPTADO, TURNO_INICIADO,\nMETRICA_LATENCIA, ..."
+  ocurrido_en : TIMESTAMPTZ
+  detalle : JSONB  "seq, ronda, partida, ts + datos"
+}
+entity partida_registro {
+  * id : BIGINT <<PK, identidad>>
+  --
+  codigo : TEXT  "sin FK: sobrevive a la sala"
+  partida : INTEGER
+  modalidad, jugadores, humanos, ganador_id
+  rondas, turnos, cierres, turnos_expirados
+  turno_promedio_ms, turno_humano_ms
+  servidor_p50/p95/p99_ms, cliente_p50/p95/p99_ms
+  inicio, fin : TIMESTAMPTZ
+}
+
+sala ||--o{ presencia : "on delete cascade"
+sala ||--o{ buzon : "on delete cascade"
+sala ||--o{ evento : "on delete cascade"
+entity partida_jugador_registro {
+  * id : BIGINT <<PK, identidad>>
+  --
+  registro_id : BIGINT <<FK>>
+  jugador_id, nombre, es_bot
+  turnos, turno_promedio_ms
+  cierres, turnos_expirados
+  servidor_p50_ms, cliente_p50/p95_ms
+}
+
+evento ..> partida_registro : "PARTIDA_FINALIZADA\n(disparador; últimas 100)"
+partida_registro ||--o{ partida_jugador_registro : "on delete cascade"
+
+note bottom of evento
+  ux_evento_cierre_partida_ronda: un solo CIERRE_ACEPTADO
+  por (codigo, partida, ronda). guardar_sala_atomica escribe
+  sala, buzon y evento en una transacción.
+end note
+
+note bottom of limite
+  Función contar_intento(clave, ventana) - security definer,
+  solo la ejecuta service_role. RLS activado en todas las tablas
+  y sin políticas: la clave publicable no lee ni escribe nada.
+end note
+@enduml

@@ -1,0 +1,156 @@
+{
+  "version": 2,
+  "nota": "Arte vectorial generado por tools/generate-assets.ts. Para reemplazar una imagen, usa el MISMO nombre y tamaño; si cambias el formato, actualiza \"ext\".",
+  "escenario": {
+    "ancho": 1920,
+    "alto": 1080,
+    "nota": "Lienzo lógico 16:9. El juego lo escala (letterbox) a cualquier ventana."
+  },
+  "cartas": {
+    "carpeta": "assets/cards/",
+    "ext": "svg",
+    "ancho": 280,
+    "alto": 392,
+    "displayAncho": 140,
+    "displayAlto": 196,
+    "radioEsquina": 24,
+    "nombre": "{valor}{pinta} (AH, 10S, KD...), JOKER, back"
+  },
+  "tablero": {
+    "carpeta": "assets/board/",
+    "ext": "svg",
+    "mesa": {
+      "archivo": "mesa",
+      "ancho": 1640,
+      "alto": 800,
+      "centro": [
+        960,
+        470
+      ]
+    },
+    "slotMazo": {
+      "archivo": "slot_mazo",
+      "ancho": 280,
+      "alto": 392,
+      "centro": [
+        855,
+        440
+      ]
+    },
+    "slotPozo": {
+      "archivo": "slot_pozo",
+      "ancho": 280,
+      "alto": 392,
+      "centro": [
+        1065,
+        440
+      ]
+    },
+    "marcadorTurno": {
+      "archivo": "marcador_turno",
+      "ancho": 256,
+      "alto": 256
+    },
+    "placaJugador": {
+      "archivo": "placa_jugador",
+      "ancho": 480,
+      "alto": 120,
+      "display": [
+        360,
+        90
+      ]
+    }
+  },
+  "fondos": {
+    "carpeta": "assets/bg/",
+    "ext": "svg",
+    "capas": [
+      {
+        "archivo": "bg_far",
+        "ancho": 1920,
+        "alto": 1080,
+        "paralaje": 0.012
+      },
+      {
+        "archivo": "bg_mid",
+        "ancho": 1920,
+        "alto": 1080,
+        "paralaje": 0.028
+      },
+      {
+        "archivo": "bg_near",
+        "ancho": 1920,
+        "alto": 1080,
+        "paralaje": 0.05
+      }
+    ]
+  },
+  "avatares": {
+    "carpeta": "assets/avatars/",
+    "ext": "svg",
+    "prefijo": "avatar_",
+    "cantidad": 8,
+    "ancho": 256,
+    "alto": 256,
+    "display": 128
+  },
+  "skins": {
+    "carpeta": "assets/skins/",
+    "ext": "svg",
+    "cartas": {
+      "ruta": "cards/back_{id}",
+      "ancho": 280,
+      "alto": 392,
+      "displayAncho": 140,
+      "displayAlto": 196,
+      "radio": 24
+    },
+    "mesas": {
+      "ruta": "tables/{id}",
+      "ancho": 1640,
+      "alto": 800
+    },
+    "ambientes": {
+      "ruta": "ambients/{id}_{far|mid|near}",
+      "ancho": 1920,
+      "alto": 1080
+    }
+  },
+  "ui": {
+    "carpeta": "assets/ui/",
+    "ext": "svg",
+    "logo": {
+      "archivo": "logo",
+      "ancho": 1280,
+      "alto": 512,
+      "display": [
+        640,
+        256
+      ]
+    },
+    "iconos": {
+      "prefijo": "icon_",
+      "nombres": [
+        "turno",
+        "reloj",
+        "corona",
+        "bot",
+        "desconectado",
+        "ajustes",
+        "ronda",
+        "eliminado",
+        "mazo",
+        "pozo",
+        "ayuda",
+        "mesa",
+        "sonido",
+        "paleta",
+        "copiar",
+        "salir"
+      ],
+      "ancho": 96,
+      "alto": 96,
+      "display": 48
+    }
+  }
+}

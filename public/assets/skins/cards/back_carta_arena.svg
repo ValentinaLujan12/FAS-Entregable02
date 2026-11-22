@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="392" viewBox="0 0 280 392"><defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e9cf9c"/><stop offset="1" stop-color="#d9b77d"/></linearGradient>
+    <clipPath id="tarjeta"><rect x="3" y="3" width="274" height="386" rx="24"/></clipPath><pattern id="p" width="60" height="26" patternUnits="userSpaceOnUse"><path d="M0 18 Q15 6 30 18 T60 18" fill="none" stroke="#fffaf0" stroke-opacity=".5" stroke-width="3" stroke-linecap="round"/></pattern></defs>
+  <rect x="3" y="3" width="274" height="386" rx="24" fill="url(#g)"/>
+  
+  <rect x="3" y="3" width="274" height="386" rx="24" fill="none" stroke="#a3895e" stroke-opacity=".55" stroke-width="3"/>
+  <rect x="17" y="17" width="246" height="358" rx="15" fill="url(#p)" stroke="#fffaf0" stroke-width="6"/>
+  <rect x="17" y="17" width="246" height="358" rx="15" fill="none" stroke="#988058" stroke-opacity=".35" stroke-width="6" stroke-dasharray="3 6"/>
+  <circle cx="140" cy="196" r="62" fill="#bfa16e" fill-opacity=".55" stroke="#fffaf0" stroke-width="4"/>
+  <circle cx="140" cy="196" r="52" fill="none" stroke="#fffaf0" stroke-opacity=".6" stroke-width="2" stroke-dasharray="1 6" stroke-linecap="round"/>
+  <g><g transform="translate(103 159) scale(0.74)" data-m="emblema"><polygon points="50.0,10.0 61.2,36.6 89.9,39.0 68.1,57.9 74.7,86.0 50.0,71.0 25.3,86.0 31.9,57.9 10.1,39.0 38.8,36.6" fill="#fffaf0" stroke="#fffaf0" stroke-width="3" stroke-linejoin="round"/><circle cx="50.0" cy="8.0" r="5.5" fill="#fffaf0"/><circle cx="91.8" cy="38.4" r="5.5" fill="#fffaf0"/><circle cx="75.9" cy="87.6" r="5.5" fill="#fffaf0"/><circle cx="24.1" cy="87.6" r="5.5" fill="#fffaf0"/><circle cx="8.2" cy="38.4" r="5.5" fill="#fffaf0"/><circle cx="50" cy="52" r="11" fill="#d9b77d" fill-opacity=".9"/></g></g></svg>

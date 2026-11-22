@@ -1,0 +1,179 @@
+@startuml 03_clases_dominio
+!include _estilo.iuml
+title El Apuntado - Modelo de dominio y orquestación (clases principales)
+hide empty members
+
+package "kernel (compartido cliente/servidor)" {
+  class Carta <<valor inmutable>> {
+    +id : string  "10H#0"
+    +valor : Valor
+    +pinta : Pinta | null
+    +esComodin : boolean
+  }
+  class Mano <<valor inmutable>> {
+    +cartas : Carta[]
+    +tamano : number
+    +contiene(id) : boolean
+    +con(carta) : Mano
+    +sin(id) : Mano
+  }
+  class Marcador <<valor inmutable>> {
+    +puntos : Record<jugadorId, number>
+    +victorias : Record<jugadorId, number>
+    +eliminados : {jugadorId, ronda}[]
+  }
+  class ParametrosModalidad {
+    +modalidad : ModalidadId
+    +minJugadores / maxJugadores
+    +mazos : AUTO | 1 | 2
+    +comodines : 0 | 2 | 4
+    +valorAs : 1 | 10 | 11
+    +aceEscalera : BAJO | ALTO | AMBOS
+    +tiempoTurnoSeg
+    +umbralEliminacion
+    +victoriasObjetivo
+    +sobranteMaxApuntado
+    +permitirCierreConSobrante
+    +cuartaCuentaComoTerna
+    +maxReciclajes
+  }
+}
+
+package "game.lobby" {
+  class LobbyManager {
+    +crearSala(nombre, modalidad, params)
+    +unirse(codigo, nombre)
+    +reconectar(codigo, token)
+    +configurar(...)
+    +agregarBot(...)
+  }
+  class Sala {
+    +codigo : string
+    +modalidad
+    +hostId
+    +estado : ESPERA | EN_CURSO | FINALIZADA
+    +partidaN : number
+  }
+  class JugadorSala {
+    +id
+    +nombre
+    +esBot
+    +tokenHash : SHA-256
+    +asiento
+  }
+}
+
+package "game" {
+  class PartidaEnCurso {
+    +robar(jugadorId, origen)
+    +descartar(jugadorId, cartaId)
+    +validarCombinacion(jugadorId, ids)
+    +cerrar(jugadorId)
+    +expirarTurno(turnoN)
+    +continuar()
+    +setConectado(id, bool)
+    +abandonar(id)
+    +snapshot() : EstadoPartida
+  }
+  class EstadoPartida <<serializable>> {
+    +codigo
+    +partidaN
+    +fase
+    +numeroRonda
+    +mazosEnJuego
+    +seq
+  }
+  class EstadoRonda {
+    +numero
+    +turnoId
+    +fase : ROBAR | DESCARTAR
+    +turnoN
+    +venceEn
+    +pozoRoboId
+    +manosIniciales
+  }
+  class JugadorPartida {
+    +id / nombre / asiento
+    +esBot
+    +eliminado
+    +conectado
+    +autopiloto  "piloto: etiqueta"
+    +automatico  "bot juega por él"
+    +saltos / turnosAuto
+    +timeouts
+  }
+  class VotacionEstado {
+    +tipo : AUTOMATICO | EXPULSION
+    +objetivoId
+    +votos : Map<jugadorId, boolean>
+    +venceEn
+  }
+}
+
+package "deck / player (por interfaces)" {
+  interface IMazo {
+    +repartir(n)
+    +voltearInicial()
+    +robarDelMazo(rng, maxReciclajes)
+    +robarDelPozo()
+    +descartar(carta)
+    +snapshot() : EstadoMazo
+  }
+  class DeckManagement
+  interface IJugadores {
+    +ordenDeTurno()
+    +siguiente(desdeId)
+    +marcarEliminado(id)
+    +marcarConectado(id, conectado)
+  }
+  class PlayerRegistry
+}
+
+package "app / infra" {
+  class TurnOrchestrator <<orquestador, IComandosJuego>> {
+    +recibir(conn, mensaje)
+    +desconectar(conn)
+    +historial(codigo, token)
+    +estadisticas()
+  }
+  class Sesion <<por sala>> {
+    conexiones : Set<Conexion>
+    cola : Promise  "serializa acciones"
+    cancelTurno / cancelBot
+  }
+  interface ITemporizadorTurno {
+    +ahora() : number
+    +programar(ms, tarea, tipo) : cancelar
+  }
+  interface Aleatorio {
+    +entero(max) : number
+  }
+}
+
+TurnOrchestrator "1" *-- "0..*" Sesion
+Sesion "1" o-- "1" Sala
+Sesion "1" o-- "0..1" PartidaEnCurso
+TurnOrchestrator --> LobbyManager
+TurnOrchestrator --> ITemporizadorTurno
+TurnOrchestrator --> Aleatorio
+LobbyManager "1" *-- "0..*" Sala
+Sala "1" *-- "2..6" JugadorSala
+Sala --> ParametrosModalidad
+PartidaEnCurso "1" *-- "1" EstadoPartida
+EstadoPartida "1" *-- "0..1" EstadoRonda
+EstadoPartida "1" *-- "2..6" JugadorPartida
+EstadoPartida --> Marcador
+EstadoRonda --> "N" Carta : manos
+EstadoPartida "1" o-- "0..1" VotacionEstado : votacion abierta
+PartidaEnCurso --> IMazo
+PartidaEnCurso --> IJugadores
+IMazo <|.. DeckManagement
+IJugadores <|.. PlayerRegistry
+DeckManagement "1" o-- "*" Carta
+Mano "1" o-- "10..11" Carta
+
+note bottom of Carta
+  El PUNTAJE no pertenece a la carta:
+  lo define la regla activa (valoracion.ts).
+end note
+@enduml

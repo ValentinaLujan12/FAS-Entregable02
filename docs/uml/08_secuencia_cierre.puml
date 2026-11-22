@@ -1,0 +1,59 @@
+@startuml 08_secuencia_cierre
+!include _estilo.iuml
+title Secuencia - Intento de cierre de ronda y liquidación (CU-01, CU-02, CU-03)
+autonumber
+actor "Jugador (UI)" as J
+participant "Procesador\n(serverless)" as PR
+participant "TurnOrchestrator\n(IComandosJuego)" as O
+participant "PartidaEnCurso" as P
+participant "IValidadorCierre\n(regla de la modalidad)" as V
+participant "HandEvaluator" as H
+participant "IServicioPuntaje\n(RoundScoring)" as S
+participant "ICalculadorPuntos\n(regla de la modalidad)" as C
+participant "IAlmacen\n(guardar_sala_atomica)" as A
+participant "ICanalTiempoReal\n(Supabase Realtime)" as R
+
+J -> PR : POST /api/juego {t:"cerrar"}
+PR -> A : leerSala(codigo) -> estado + versión
+PR -> O : recibir(conexión, {t:"cerrar"})
+O -> P : cerrar(jugadorId)
+P -> V : validarVictoria(mano de 11 cartas)
+alt Modalidad Clásica (4-3-3)
+  V -> H : buscarParticionExacta(mano, [4 x1, 3 x2])
+  H --> V : 1 cuarta + 2 ternas + 1 descarte
+else Modalidad Apuntado a 101
+  V -> H : buscarParticionExacta(mano, 3 combinaciones)
+  H --> V : 3 combinaciones + sobrantes
+  V -> V : sobrante = calcularPuntos(sobrantes) < 5 ?
+end
+V --> P : ResultadoCierre
+
+alt cierre inválido (A1 / A2)
+  P --> O : CIERRE_RECHAZADO {motivo}
+  note right of P : El jugador conserva el turno.\nEl estado no cambia.
+else cierre válido
+  P -> S : liquidarRonda(regla, manos, marcador, cierre)
+  S -> C : liquidarRonda(manos)
+  alt Clásica
+    C --> S : delta 0 para todos; +1 ronda ganada al cerrador
+    S -> C : evaluarPartida(marcador)
+    C --> S : ¿alcanzó las rondas objetivo?
+  else Apuntado a 101
+    C --> S : perdedores suman sus sueltas; el cerrador 0
+    S -> C : evaluarPartida(marcador)
+    C --> S : eliminados con >= 101; ¿queda uno solo?
+  end
+  S --> P : marcador nuevo + posiciones si terminó
+  P --> O : CIERRE_ACEPTADO {partida, ronda}, RONDA_LIQUIDADA,\n[JUGADOR_ELIMINADO], [PARTIDA_FINALIZADA]
+end
+O --> PR : mensajes por jugador (vista proyectada, sin manos ajenas)
+PR -> A : guardarAtomico(sala, versión, buzones, eventos)
+alt versión vigente y cierre único por partida y ronda
+  A --> PR : true (una sola transacción)
+  PR -> R : avisarCambio(codigo)  - después de guardar
+  PR --> J : mensajes + estado (LIQUIDACION o FINALIZADA)
+else otra petición escribió antes (versión vieja o cierre repetido)
+  A --> PR : false (no escribe nada)
+  PR -> PR : reintenta sobre el estado nuevo (ADR-07)
+end
+@enduml

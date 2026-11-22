@@ -1,0 +1,219 @@
+{
+  "fecha": "2026-11-22T14:18:07.367Z",
+  "umbralD": 0.5,
+  "modulos": [
+    {
+      "modulo": "deck",
+      "archivos": 4,
+      "ca": 3,
+      "ce": 1,
+      "abstractos": 2,
+      "concretos": 7,
+      "I": 0.25,
+      "A": 0.2222222222222222,
+      "D": 0.5277777777777778,
+      "tipo": "base estable",
+      "cumple": true,
+      "dependeDe": [
+        "kernel"
+      ]
+    },
+    {
+      "modulo": "estado",
+      "archivos": 1,
+      "ca": 3,
+      "ce": 3,
+      "abstractos": 0,
+      "concretos": 0,
+      "I": 0.5,
+      "A": 0,
+      "D": 0.5,
+      "tipo": "núcleo",
+      "cumple": true,
+      "dependeDe": [
+        "deck",
+        "kernel",
+        "player"
+      ]
+    },
+    {
+      "modulo": "extras",
+      "archivos": 15,
+      "ca": 2,
+      "ce": 5,
+      "abstractos": 3,
+      "concretos": 26,
+      "I": 0.7142857142857143,
+      "A": 0.10344827586206896,
+      "D": 0.18226600985221675,
+      "tipo": "informativo",
+      "cumple": true,
+      "dependeDe": [
+        "game",
+        "kernel",
+        "persistence",
+        "rules",
+        "web"
+      ]
+    },
+    {
+      "modulo": "game",
+      "archivos": 5,
+      "ca": 2,
+      "ce": 8,
+      "abstractos": 11,
+      "concretos": 5,
+      "I": 0.8,
+      "A": 0.6875,
+      "D": 0.48750000000000004,
+      "tipo": "núcleo",
+      "cumple": true,
+      "dependeDe": [
+        "deck",
+        "estado",
+        "infra",
+        "kernel",
+        "persistence",
+        "player",
+        "rules",
+        "scoring"
+      ]
+    },
+    {
+      "modulo": "infra",
+      "archivos": 4,
+      "ca": 2,
+      "ce": 3,
+      "abstractos": 4,
+      "concretos": 6,
+      "I": 0.6,
+      "A": 0.4,
+      "D": 0,
+      "tipo": "núcleo",
+      "cumple": true,
+      "dependeDe": [
+        "estado",
+        "kernel",
+        "player"
+      ]
+    },
+    {
+      "modulo": "kernel",
+      "archivos": 6,
+      "ca": 10,
+      "ce": 0,
+      "abstractos": 0,
+      "concretos": 14,
+      "I": 0,
+      "A": 0,
+      "D": 1,
+      "tipo": "base estable",
+      "cumple": true,
+      "dependeDe": []
+    },
+    {
+      "modulo": "persistence",
+      "archivos": 6,
+      "ca": 3,
+      "ce": 2,
+      "abstractos": 3,
+      "concretos": 3,
+      "I": 0.4,
+      "A": 0.5,
+      "D": 0.09999999999999998,
+      "tipo": "núcleo",
+      "cumple": true,
+      "dependeDe": [
+        "estado",
+        "kernel"
+      ]
+    },
+    {
+      "modulo": "player",
+      "archivos": 3,
+      "ca": 3,
+      "ce": 0,
+      "abstractos": 1,
+      "concretos": 2,
+      "I": 0,
+      "A": 0.3333333333333333,
+      "D": 0.6666666666666667,
+      "tipo": "base estable",
+      "cumple": true,
+      "dependeDe": []
+    },
+    {
+      "modulo": "rules",
+      "archivos": 7,
+      "ca": 4,
+      "ce": 1,
+      "abstractos": 5,
+      "concretos": 8,
+      "I": 0.2,
+      "A": 0.38461538461538464,
+      "D": 0.41538461538461535,
+      "tipo": "base estable",
+      "cumple": true,
+      "dependeDe": [
+        "kernel"
+      ]
+    },
+    {
+      "modulo": "scoring",
+      "archivos": 3,
+      "ca": 1,
+      "ce": 2,
+      "abstractos": 1,
+      "concretos": 2,
+      "I": 0.6666666666666666,
+      "A": 0.3333333333333333,
+      "D": 0,
+      "tipo": "núcleo",
+      "cumple": true,
+      "dependeDe": [
+        "kernel",
+        "rules"
+      ]
+    },
+    {
+      "modulo": "serverless",
+      "archivos": 5,
+      "ca": 0,
+      "ce": 7,
+      "abstractos": 1,
+      "concretos": 11,
+      "I": 1,
+      "A": 0.08333333333333333,
+      "D": 0.08333333333333326,
+      "tipo": "núcleo",
+      "cumple": true,
+      "dependeDe": [
+        "deck",
+        "extras",
+        "game",
+        "infra",
+        "kernel",
+        "persistence",
+        "rules"
+      ]
+    },
+    {
+      "modulo": "web",
+      "archivos": 14,
+      "ca": 1,
+      "ce": 2,
+      "abstractos": 2,
+      "concretos": 32,
+      "I": 0.6666666666666666,
+      "A": 0.058823529411764705,
+      "D": 0.27450980392156865,
+      "tipo": "informativo",
+      "cumple": true,
+      "dependeDe": [
+        "extras",
+        "kernel"
+      ]
+    }
+  ],
+  "cicloEntreModulos": null
+}

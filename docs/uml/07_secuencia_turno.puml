@@ -1,0 +1,53 @@
+@startuml 07_secuencia_turno
+!include _estilo.iuml
+title Secuencia - CU-05 Ejecutar turno (robar -> agrupar -> descartar) con proyección privada
+autonumber
+actor Jugador as J
+participant "Cliente web" as C
+participant "Función /api/juego\n(Procesador)" as W
+participant "TurnOrchestrator" as S
+participant "PartidaEnCurso" as P
+participant "IAlmacen\n(guardar_sala_atomica)" as R
+participant "ProgramadorVirtual\n(ITemporizadorTurno)" as T
+participant "ICanalTiempoReal\n(Supabase Realtime)" as RT
+actor "Otros jugadores" as O
+
+== Robar ==
+J -> C : clic en mazo / pozo
+C -> W : POST /api/juego {t:"robar", origen:"MAZO"}
+W -> R : leerSala (con versión)
+W -> S : montarExacta + recibir(conn, msg)
+activate S
+S -> P : robar(jugadorId, origen)
+P --> S : ok + eventos [CARTA_ROBADA]
+W -> R : guardarAtomico(sala, versión, buzones, eventos)\nsi otra petición ganó: se repite sobre el estado nuevo
+note right of R : Buzón de los demás: {t:"eventos"}\nsin identidad de la carta si viene del mazo
+W -> RT : avisarCambio(codigo) - después de guardar
+W --> C : {t:"eventos"} + {t:"estado", vista} (mano de 11)
+RT --> O : aviso "cambio": piden su buzón ({t:"estado"}, numCartas+1)
+deactivate S
+
+== Agrupar (asistencia opcional) ==
+J -> C : selecciona 3+ cartas -> "Agrupar"
+C -> W : POST /api/juego {t:"validar", cartaIds}
+W -> S : recibir
+S -> P : validarCombinacion(jugadorId, ids)
+P --> S : {valida, tipo, mensaje}
+S --> C : {t:"validacion", valida, tipo}
+note right of C : El servidor NO guarda los grupos:\nson ayuda visual del cliente.
+
+== Descartar y ceder turno ==
+J -> C : arrastra carta al pozo
+C -> W : POST /api/juego {t:"descartar", cartaId}
+W -> S : recibir
+S -> P : descartar(jugadorId, cartaId)
+P -> P : pasarTurno() (turnoN++, venceEn)
+P --> S : ok + eventos [CARTA_DESCARTADA, TURNO_INICIADO]
+S -> T : programar(tiempo, expirarTurno(turnoN))\n(se guarda como proximoEn; vence en la petición que llegue después)
+W -> R : guardarAtomico(sala, versión, buzones, eventos)
+W -> RT : avisarCambio(codigo)
+W --> C : eventos + estado
+opt siguiente jugador es bot
+  S -> T : programar(retardoBot, decidirAccionBot, "bot")\n(se ejecuta en la misma petición con reloj virtual)
+end
+@enduml

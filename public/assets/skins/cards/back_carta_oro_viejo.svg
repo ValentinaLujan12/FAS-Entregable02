@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="392" viewBox="0 0 280 392"><defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b08a68"/><stop offset="1" stop-color="#8f6c50"/></linearGradient>
+    <clipPath id="tarjeta"><rect x="3" y="3" width="274" height="386" rx="24"/></clipPath><pattern id="p" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M20 2 L38 20 L20 38 L2 20 Z" fill="none" stroke="#f3d48c" stroke-opacity=".5" stroke-width="2"/><circle cx="20" cy="20" r="5" fill="none" stroke="#f3d48c" stroke-opacity=".6" stroke-width="2"/><circle cx="20" cy="20" r="1.8" fill="#f3d48c" fill-opacity=".7"/></pattern><linearGradient id="tinta" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#faeed1"/><stop offset=".3" stop-color="#f3d48c"/><stop offset=".5" stop-color="#aa9462"/><stop offset=".72" stop-color="#f3d48c"/><stop offset="1" stop-color="#faeed1"/></linearGradient></defs>
+  <rect x="3" y="3" width="274" height="386" rx="24" fill="url(#g)"/>
+  
+  <rect x="3" y="3" width="274" height="386" rx="24" fill="none" stroke="#6b513c" stroke-opacity=".55" stroke-width="3"/>
+  <rect x="17" y="17" width="246" height="358" rx="15" fill="url(#p)" stroke="url(#tinta)" stroke-width="6"/>
+  <rect x="17" y="17" width="246" height="358" rx="15" fill="none" stroke="#644c38" stroke-opacity=".35" stroke-width="6" stroke-dasharray="3 6"/>
+  <circle cx="140" cy="196" r="62" fill="#7e5f46" fill-opacity=".55" stroke="url(#tinta)" stroke-width="4"/>
+  <circle cx="140" cy="196" r="52" fill="none" stroke="url(#tinta)" stroke-opacity=".6" stroke-width="2" stroke-dasharray="1 6" stroke-linecap="round"/>
+  <g><g transform="translate(103 159) scale(0.74)" data-m="emblema"><polygon points="50.0,10.0 61.2,36.6 89.9,39.0 68.1,57.9 74.7,86.0 50.0,71.0 25.3,86.0 31.9,57.9 10.1,39.0 38.8,36.6" fill="url(#tinta)" stroke="url(#tinta)" stroke-width="3" stroke-linejoin="round"/><circle cx="50.0" cy="8.0" r="5.5" fill="url(#tinta)"/><circle cx="91.8" cy="38.4" r="5.5" fill="url(#tinta)"/><circle cx="75.9" cy="87.6" r="5.5" fill="url(#tinta)"/><circle cx="24.1" cy="87.6" r="5.5" fill="url(#tinta)"/><circle cx="8.2" cy="38.4" r="5.5" fill="url(#tinta)"/><circle cx="50" cy="52" r="11" fill="#8f6c50" fill-opacity=".9"/></g></g></svg>

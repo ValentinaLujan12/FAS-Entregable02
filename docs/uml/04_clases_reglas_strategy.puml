@@ -1,0 +1,92 @@
+@startuml 04_clases_reglas_strategy
+!include _estilo.iuml
+title Reglas: interfaces segregadas, Strategy y registro (ADR-02, ADR-03, ADR-08)
+hide empty members
+
+interface IValidadorCierre <<pValida: game -> rules>> {
+  +cartasParaCerrar() : number
+  +validarVictoria(mano : Mano) : ResultadoCierre
+  +clasificarCombinacion(cartas : Carta[]) : Combinacion | null
+}
+interface ICalculadorPuntos <<pPuntos: scoring -> rules>> {
+  +getModalidad() : ModalidadId
+  +calcularPuntos(cartas : Carta[]) : number
+  +particionResidual(cartas : Carta[]) : Particion
+  +liquidarRonda(entrada) : SalidaLiquidacion
+  +evaluarPartida(entrada) : ResultadoPartida
+}
+interface IReglaJuego <<Strategy>> {
+  +parametros() : ParametrosModalidad
+  +tamanosObjetivo() : number[]
+}
+interface IRegistroReglas {
+  +modalidades() : string[]
+  +reglaPara(parametros) : IReglaJuego
+}
+abstract class ReglaBase {
+  #evaluador : HandEvaluator
+  #valoracion : Valoracion
+  +liquidarRonda(entrada) : SalidaLiquidacion
+  #manoIncompleta(mano) : ResultadoCierre | null
+  #cierreCuartaDosTernas(mano, tipo, rechazo)
+  #alcanzoTope(ronda) : boolean
+  #{abstract} deltaRonda(esGanador, puntos) : number
+}
+class ReglaClasicaCuartaTerna {
+  cierre: 1 cuarta + 2 ternas + descarte
+  puntos: 0 (gana por rondas)
+  fin: victoriasObjetivo
+}
+class ReglaApuntado101Puntos {
+  cierre: 3 ternas + sobrante < 5
+  (cuartaCuentaComoTerna, por defecto no:
+   si se activa, cuarta o quinta cuenta como terna)
+  (o estricto: cuarta + 2 ternas)
+  puntos: sueltas de los perdedores
+  fin: eliminado con >= 101; gana el último
+}
+class RegistroReglas <<registro explícito>> {
+  -fabricas : Map<string, FabricaRegla>
+  +registrar(modalidad, fabrica) : RegistroReglas
+}
+class HandEvaluator <<núcleo compartido>> {
+  +clasificar(cartas) : Combinacion | null
+  +mejorParticion(cartas, tamanos, puntosDe) : Particion
+  +buscarParticionExacta(cartas, requisitos, puntosDe) : Particion | null
+  +particionSinSobrantes(cartas, puntosDe) : Particion | null
+}
+class Valoracion {
+  +puntosDe(carta) : number
+  +sumar(cartas) : number
+}
+interface IServicioPuntaje <<pPuntaje: game -> scoring>> {
+  +liquidarRonda(entrada : EntradaLiquidar) : ResultadoLiquidacion
+}
+class RoundScoring {
+  +posiciones(regla, marcador, todos, ganadorId)
+}
+class ReglaFutura <<extensión: 1 clase + 1 registro>> #FFF8E1
+
+IValidadorCierre <|-- IReglaJuego
+ICalculadorPuntos <|-- IReglaJuego
+IReglaJuego <|.. ReglaBase
+ReglaBase <|-- ReglaClasicaCuartaTerna
+ReglaBase <|-- ReglaApuntado101Puntos
+ReglaBase <|-- ReglaFutura
+IRegistroReglas <|.. RegistroReglas
+RegistroReglas ..> IReglaJuego : crea por partida
+ReglaBase *-- HandEvaluator
+ReglaBase *-- Valoracion
+IServicioPuntaje <|.. RoundScoring
+RoundScoring --> ICalculadorPuntos : solo este contrato
+
+note right of IReglaJuego
+  PartidaEnCurso usa IValidadorCierre;
+  RoundScoring usa ICalculadorPuntos.
+  Ninguno conoce una modalidad concreta.
+end note
+note bottom of HandEvaluator
+  Programación dinámica sobre máscaras de bits.
+  CC <= 4 en cada método (G3); p99 < 2 ms (FF-16).
+end note
+@enduml

@@ -1,0 +1,32 @@
+@startuml 06_estados_turno
+!include _estilo.iuml
+title Máquina de estados del turno (FaseTurno) y temporizador (turnoN)
+
+[*] --> ROBAR : TURNO_INICIADO\n(turnoN++, venceEn = ahora + tiempo)
+
+state ROBAR
+state DESCARTAR
+state Decision <<choice>>
+
+ROBAR --> DESCARTAR : robar(MAZO)\n/ CARTA_ROBADA (mano de 11)
+ROBAR --> DESCARTAR : robar(POZO) [permitirRoboPozo]\n/ pozoRoboId = carta
+ROBAR --> ROBAR : robar(POZO) [pozo vacío]\n/ error POZO_VACIO
+DESCARTAR --> DESCARTAR : descartar(pozoRoboId)\n/ error DEVOLUCION_PROHIBIDA
+DESCARTAR --> Decision : cerrar
+Decision --> LIQ : [validarVictoria.valido]\n/ CIERRE_ACEPTADO
+Decision --> DESCARTAR : [rechazado]\n/ CIERRE_RECHAZADO + motivo
+DESCARTAR --> ROBAR : descartar(carta)\n/ CARTA_DESCARTADA,\nsiguiente jugador activo
+ROBAR --> ROBAR : expirarTurno(turnoN) [vigente]\n/ roba del mazo + descarta auto\n-> siguiente turno
+DESCARTAR --> ROBAR : expirarTurno(turnoN) [vigente]\n/ descarta auto -> siguiente turno
+
+state "Liquidación de ronda" as LIQ
+LIQ --> [*]
+
+note bottom of ROBAR
+  timeouts ≥ 2 consecutivos ⇒ "piloto" (etiqueta; el turno
+  espera el reloj completo) hasta que el humano actúe.
+  >3 turnos saltados ⇒ votación "automático completo";
+  si sigue ausente ⇒ votación "expulsar".
+  turnoN obsoleto ⇒ temporizador ignorado.
+end note
+@enduml

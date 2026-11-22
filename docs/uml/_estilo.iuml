@@ -1,0 +1,39 @@
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 12
+skinparam ArrowColor #0B4F4A
+skinparam ActorBorderColor #0B4F4A
+skinparam ActorBackgroundColor #E6F2F1
+skinparam class {
+  BackgroundColor #F4FAF9
+  BorderColor #0B4F4A
+  HeaderBackgroundColor #D9ECEA
+  AttributeFontSize 11
+}
+skinparam component {
+  BackgroundColor #F4FAF9
+  BorderColor #0B4F4A
+}
+skinparam package {
+  BorderColor #B8860B
+  FontColor #6B4E00
+}
+skinparam rectangle {
+  BackgroundColor #F4FAF9
+  BorderColor #0B4F4A
+}
+skinparam note {
+  BackgroundColor #FFF8E1
+  BorderColor #B8860B
+}
+skinparam sequence {
+  LifeLineBorderColor #0B4F4A
+  ParticipantBackgroundColor #E6F2F1
+  ParticipantBorderColor #0B4F4A
+}
+skinparam state {
+  BackgroundColor #F4FAF9
+  BorderColor #0B4F4A
+}

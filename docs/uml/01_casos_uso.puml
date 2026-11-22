@@ -1,0 +1,67 @@
+@startuml 01_casos_uso
+!include _estilo.iuml
+title El Apuntado - Casos de uso\nCU-01...CU-05 = Entregable 1 §2.4 - EXT-x = extensiones añadidas en la construcción
+left to right direction
+
+actor "Jugador" as J
+actor "Administrador\nde Sala (Host)" as H
+actor "Sistema /\nTemporizador" as T
+actor "Bot" as B
+actor "Auditor /\nInstructor" as A
+H --|> J
+B -up-|> J
+
+rectangle "Sistema Digital de El Apuntado" {
+  usecase "EXT-1 Crear / unirse\na sala (código)" as EXT1
+  usecase "EXT-2 Configurar modalidad,\nparámetros y bots" as EXT2
+  usecase "CU-04 Iniciar partida\n(barajar y repartir)" as CU04
+  usecase "CU-05 Ejecutar turno\n(robar y descartar)" as CU05
+  usecase "CU-01 Ejecutar cierre de ronda\nClásica (4-3-3)" as CU01
+  usecase "CU-02 Declarar cierre por\nApuntado (sobrante < 5)" as CU02
+  usecase "CU-03 Liquidar puntos de ronda\ny evaluar umbral 101" as CU03
+  usecase "Validar victoria según\nmodalidad (Strategy)" as REG
+  usecase "Notificar rechazo (RF11)\ny reanudar turno" as RECH
+  usecase "Finalizar partida\ny podio (RF16)" as FIN
+  usecase "EXT-3 Turno vencido:\njugada automática / piloto" as EXT3
+  usecase "EXT-4 Agrupar cartas\n(validar combinación)" as EXT4
+  usecase "EXT-5 Reconectar y recuperar\nestado (A2 de CU-04, RF19)" as EXT5
+  usecase "EXT-6 Revancha" as EXT6
+  usecase "EXT-7 Consultar historial auditable\ny métricas de las partidas (RF19)" as EXT7
+  usecase "EXT-8 Votar por inactividad:\nautomático completo / expulsar" as EXT8
+  usecase "EXT-9 Personalizar estilo\n(skins de cartas, mesa, ambiente)" as EXT9
+  usecase "EXT-10 Ajustar sonido\ny controles de teclado" as EXT10
+}
+
+J --> EXT1
+H --> EXT2
+H --> CU04
+J --> CU05
+J --> CU01
+J --> CU02
+J --> EXT4
+J --> EXT5
+H --> EXT6
+A --> EXT7
+T --> EXT3
+J --> EXT8
+J --> EXT9
+J --> EXT10
+
+CU04 ..> EXT2 : <<include>>
+CU01 ..> REG : <<include>>
+CU02 ..> REG : <<include>>
+CU01 ..> CU03 : <<include>>
+CU02 ..> CU03 : <<include>>
+CU01 ..> RECH : <<extend>>\n[A1: combinación inválida]
+CU02 ..> RECH : <<extend>>\n[A1/A2: ternas incompletas\no sobrante ≥ 5]
+FIN ..> CU03 : <<extend>>\n[A2: un solo activo /\numbral alcanzado]
+EXT3 ..> CU05 : <<extend>>\n[tiempo agotado, RF08]
+EXT4 ..> REG : <<include>>
+EXT6 ..> FIN : <<extend>>
+EXT8 ..> EXT3 : <<extend>>\n[>3 turnos saltados]
+
+note right of REG
+  Variabilidad aislada en IReglaJuego:
+  Clásica 4-3-3 - Apuntado 101
+end note
+@enduml

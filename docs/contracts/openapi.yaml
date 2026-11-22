@@ -1,0 +1,235 @@
+openapi: 3.0.3
+info:
+  title: El Apuntado - API HTTP
+  version: 2.0.0
+  description: |
+    API de la función de Vercel (`api/index.ts`). Todo el juego viaja por `POST /api/juego`: el cliente envía una
+    intención (mismos mensajes que `asyncapi.yaml`) o una sincronización vacía, y recibe los mensajes de su buzón con
+    su hora de envío. Salvo `/api/salud` y `/api/acceso*`, todas las rutas exigen la cookie de sesión.
+    Las peticiones POST exigen cabecera `Origin` del mismo sitio (403 si no). Cuerpo máximo 8 KiB.
+servers:
+  - url: http://localhost:3000
+    description: Desarrollo local (npm run dev)
+  - url: https://{proyecto}.vercel.app
+    description: Vercel
+    variables:
+      proyecto:
+        default: el-apuntado
+tags:
+  - name: Sistema
+  - name: Acceso
+  - name: Juego
+paths:
+  /api/salud:
+    get:
+      tags: [Sistema]
+      operationId: salud
+      security: []
+      summary: Estado del servicio y de la configuración
+      responses:
+        '200':
+          description: Estado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  estado: { type: string, enum: [ok, configuracion-incompleta] }
+                  detalle: { type: string, nullable: true }
+                  baseDatos: { type: string, enum: [supabase, memoria] }
+                  tiempoReal: { type: boolean, description: Supabase Realtime configurado (URL + claves) }
+  /api/acceso:
+    get:
+      tags: [Acceso]
+      operationId: estadoAcceso
+      security: []
+      summary: Indica si el navegador tiene una sesión válida
+      responses:
+        '200':
+          description: Estado de la sesión
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Acceso' }
+  /api/acceso/entrar:
+    post:
+      tags: [Acceso]
+      operationId: entrar
+      security: []
+      summary: Usuario y contraseña comunes del sitio
+      description: Verifica contra `ACCESO_USUARIOS` (PBKDF2-SHA256). Límite de 10 intentos por 15 min por identificador anónimo.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [usuario, contrasena]
+              properties:
+                usuario: { type: string, maxLength: 64 }
+                contrasena: { type: string, maxLength: 256 }
+      responses:
+        '200':
+          description: Acceso concedido; fija la cookie de sesión (HttpOnly, Secure, SameSite=Strict, 7 días)
+          headers:
+            Set-Cookie: { schema: { type: string } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Acceso' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/Error' }
+  /api/acceso/salir:
+    post:
+      tags: [Acceso]
+      operationId: salir
+      security: []
+      summary: Cierra la sesión en este navegador
+      responses:
+        '200':
+          description: Cookie borrada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Acceso' }
+  /api/config:
+    get:
+      tags: [Sistema]
+      operationId: configuracion
+      summary: Datos públicos para el aviso en tiempo real (Supabase Realtime)
+      security: [{ sesion: [] }]
+      parameters:
+        - name: prueba
+          in: query
+          required: false
+          description: Con 1, el servidor envía una difusión de prueba y devuelve `prueba` = ok, sin-configurar o error.
+          schema: { type: string, enum: ['1'] }
+      responses:
+        '200':
+          description: Configuración del cliente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tiempoReal:
+                    type: object
+                    nullable: true
+                    description: Null si no hay Supabase configurado (el cliente solo consulta periódicamente).
+                    properties:
+                      url: { type: string }
+                      clave: { type: string, description: Clave publicable (no secreta) }
+                  prueba: { type: string, description: Solo con ?prueba=1 }
+        '401': { $ref: '#/components/responses/Error' }
+  /api/modalidades:
+    get:
+      tags: [Juego]
+      operationId: listarModalidades
+      summary: Modalidades de juego y sus parámetros por defecto
+      security: [{ sesion: [] }]
+      responses:
+        '200':
+          description: Lista de modalidades
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/InfoModalidad' }
+        '401': { $ref: '#/components/responses/Error' }
+  /api/juego:
+    post:
+      tags: [Juego]
+      operationId: juego
+      summary: Envía una intención o sincroniza, y recibe los mensajes pendientes
+      description: |
+        Sin `msg` = sincronizar (latido de presencia y buzón). Con `msg` = intención del protocolo (ver asyncapi.yaml).
+        El cliente reproduce cada mensaje en `recibido + (en - ahora)` y vuelve a consultar en `proximoEn` si existe.
+      security: [{ sesion: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                codigo: { type: string, pattern: '^[A-Z0-9]{3,8}$' }
+                token: { type: string, description: Token de asiento recibido en el mensaje `sesion` }
+                clave: { type: string, description: Clave anónima de la cuenta de skins }
+                vista: { type: boolean, description: El cliente acaba de cargar y necesita la vista completa }
+                rttMs: { type: integer, minimum: 0, maximum: 60000, description: Ida y vuelta de la petición anterior medida por el navegador (ms). Solo para las métricas de latencia }
+                msg: { type: object, description: Mensaje cliente->servidor discriminado por `t` }
+      responses:
+        '200':
+          description: Mensajes para este jugador
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ahora: { type: integer, description: Hora del servidor (ms) }
+                  proximoEn: { type: integer, nullable: true, description: 'Próximo plazo: fin de turno, votación o pausa' }
+                  mensajes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        en: { type: integer, description: Hora (ms) a la que debe mostrarse }
+                        m: { type: object, description: Mensaje servidor->cliente (ver asyncapi.yaml) }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+components:
+  securitySchemes:
+    sesion:
+      type: apiKey
+      in: cookie
+      name: __Host-apuntado
+  responses:
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string }
+              mensaje: { type: string }
+  schemas:
+    ModalidadId:
+      type: string
+      description: Identificador de modalidad registrada en el RegistroReglas (extensible sin migraciones).
+      enum: [CLASICA, APUNTADO]
+    InfoModalidad:
+      type: object
+      required: [id, nombre, resumen, sentidoPuntaje, parametros]
+      properties:
+        id: { $ref: '#/components/schemas/ModalidadId' }
+        nombre: { type: string }
+        resumen: { type: string }
+        sentidoPuntaje: { type: string, enum: [MENOS, VICTORIAS] }
+        parametros: { $ref: '#/components/schemas/ParametrosModalidad' }
+    ParametrosModalidad:
+      type: object
+      properties:
+        modalidad: { $ref: '#/components/schemas/ModalidadId' }
+        minJugadores: { type: integer, example: 2 }
+        maxJugadores: { type: integer, example: 6 }
+        cartasPorMano: { type: integer, example: 10 }
+        mazos: { description: "'AUTO' = 1 mazo hasta 4 jugadores, 2 mazos de 5 a 6", oneOf: [{ type: string, enum: [AUTO] }, { type: integer, enum: [1, 2] }] }
+        comodines: { type: integer, enum: [0, 2, 4] }
+        valorAs: { type: integer, enum: [1, 10, 11] }
+        aceEscalera: { type: string, enum: [BAJO, ALTO, AMBOS] }
+        tiempoTurnoSeg: { type: integer, minimum: 10, maximum: 300 }
+        tiempoTurnoDesconectadoSeg: { type: integer }
+        permitirRoboPozo: { type: boolean }
+        umbralEliminacion: { type: integer, minimum: 20, maximum: 1000 }
+        victoriasObjetivo: { type: integer, minimum: 1, maximum: 20 }
+        rondasMax: { type: integer, nullable: true, minimum: 1, maximum: 100 }
+        sobranteMaxApuntado: { type: integer }
+        permitirCierreConSobrante: { type: boolean, description: 'Apuntado 101: permite cerrar con 3 ternas + sobrante (< sobranteMaxApuntado). Por defecto true. Si es false se exige cuarta + 2 ternas + descarte.' }
+        cuartaCuentaComoTerna: { type: boolean, description: 'Apuntado 101 con sobrante: si es true (por defecto), una cuarta o quinta cuenta como una de las 3 combinaciones (3-3-3, 4-3-3, 4-4-3, 5-3-3); si es false, se exigen exactamente 3 ternas.' }
+        pausaLiquidacionSeg: { type: integer, minimum: 3, maximum: 120 }
+        maxReciclajes: { type: integer }
+    Acceso:
+      type: object
+      properties:
+        acceso: { type: boolean }
+        usuario: { type: string }

@@ -1,0 +1,45 @@
+@startuml 09_secuencia_reconexion
+!include _estilo.iuml
+title Secuencia - Presencia, reconexión por token y estado persistente (EXT-5 - A2 de CU-04, RF19)
+autonumber
+actor Jugador as J
+participant "Cliente web" as C
+participant "Función /api/juego\n(Procesador)" as P
+participant "TurnOrchestrator" as S
+participant "LobbyManager" as L
+database "Supabase" as DB
+
+== Presencia (cada 1,5 s) ==
+C -> P : POST {codigo, token}
+P -> DB : leer sala + presencias
+P -> DB : tocar presencia del jugador
+P -> DB : sacar buzón
+P --> C : {ahora, mensajes[], proximoEn}
+
+== Pérdida de conexión ==
+C -x P : el jugador deja de consultar
+note over P : Ninguna petición lo ve en 30 s
+P -> S : desconectar(jugador) (en la siguiente petición de otro jugador)
+S -> S : setConectado(false)\ntiempoTurnoMs() usa tiempoTurnoDesconectadoSeg
+P -> DB : guardarAtomico(sala, versión, buzones de los demás, eventos)
+
+== Reconexión ==
+J -> C : recarga la página
+C -> C : lee localStorage["apuntado.sesion"] {codigo, token}
+C -> P : POST {codigo, token, vista:true}
+P -> DB : leer sala
+P -> S : montarExacta(sala, snapshot)
+P -> S : recibir {t:"reconectar", codigo, token}
+S -> L : reconectar(codigo, token)
+L -> L : SHA-256(token) == tokenHash ?
+alt token válido
+  S --> P : {t:"sesion"}, {t:"estado", vista} (solo SU mano)
+  P -> DB : guardarAtomico(sala, versión)
+  P --> C : mensajes
+else token inválido
+  S --> P : {t:"error", codigo:"TOKEN_INVALIDO"}
+  P --> C : mensajes
+  C -> C : borra sesión local -> pantalla de inicio
+end
+note over C,DB : No hay proceso que reiniciar: la sala vive en la base de datos\ny cualquier instancia de la función continúa la partida en el mismo punto.
+@enduml

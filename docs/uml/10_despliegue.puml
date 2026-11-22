@@ -1,0 +1,41 @@
+@startuml 10_despliegue
+!include _estilo.iuml
+title El Apuntado - Vista de despliegue (Vercel + Supabase)
+
+node "Navegador del jugador\n(Chrome / Firefox / Safari / Edge)" as NAV {
+  artifact "index.html + app.js + styles.css\n+ fonts/ + assets/ (SVG)" as SPA
+  artifact "Cookie de sesión\n(HttpOnly, firmada)" as COOKIE
+}
+
+cloud "GitHub" as GH {
+  artifact "Repositorio\n(sin secretos)" as REPO
+}
+
+cloud "Vercel" as VER {
+  node "CDN de estáticos" as CDN {
+    artifact "public/" as PUB
+  }
+  node "Función Node 22\n(api/index.ts, máx. 30 s)" as FN {
+    artifact "Procesador\n+ TurnOrchestrator\n+ ProgramadorVirtual" as PROC
+    artifact "Variables de entorno:\nACCESO_USUARIOS (hash)\nSECRETO_SESION\nSUPABASE_URL\nSUPABASE_SECRET_KEY\nSUPABASE_PUBLISHABLE_KEY" as ENV
+  }
+}
+
+cloud "Supabase" as SB {
+  database "PostgreSQL\nsala, buzon, presencia, cuenta,\nlimite, evento (RLS)\npartida_registro (+ por jugador)\nguardar_sala_atomica()\ntr_registrar_partida" as PG
+  node "Realtime\n(difusión sala-<CODIGO>)" as RT
+}
+
+REPO --> VER : despliegue automático\nen cada push
+SPA --> CDN : HTTPS (estáticos)
+SPA --> FN : HTTPS POST /api/juego\n(intención o sincronización)
+FN --> PG : HTTPS (supabase-js,\nclave secreta)
+FN --> RT : aviso de cambio
+RT ..> SPA : WSS (solo aviso,\nsin datos del juego)
+
+note bottom of FN
+  Cada petición: leer sala -> reconstruir -> presencia ->
+  mensaje -> reloj al día (plazos y bots) -> guardar con versión ->
+  buzones de los demás. No guarda IPs.
+end note
+@enduml

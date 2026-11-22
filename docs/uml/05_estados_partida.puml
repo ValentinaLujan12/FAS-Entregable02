@@ -1,0 +1,24 @@
+@startuml 05_estados_partida
+!include _estilo.iuml
+title Máquina de estados de la sala / partida (FaseSala)
+
+[*] --> ESPERA : crear_sala
+ESPERA : Lobby: unirse, configurar,\nagregar/quitar bots
+ESPERA --> ESPERA : unirse / configurar /\nagregar_bot / quitar_jugador
+ESPERA --> EN_CURSO : iniciar [host ∧ jugadores ≥ mín]\n/ repartir, RONDA_INICIADA
+
+state EN_CURSO {
+  [*] --> Turno
+  Turno : ver máquina de turnos (06)
+  Turno --> Turno : descartar\n/ siguiente jugador
+  Turno --> Turno : turno vencido\n/ autodescarte / piloto / votaciones
+}
+
+EN_CURSO --> LIQUIDACION : cierre aceptado\n∨ tablas (reciclajes agotados)
+LIQUIDACION : Pantalla de puntajes\nauto-continúa (pausaLiquidacionSeg)
+LIQUIDACION --> EN_CURSO : continuar\n[evaluarPartida: no finalizada]\n/ nueva ronda
+LIQUIDACION --> FINALIZADA : evaluarPartida: finalizada\n∨ un solo activo
+FINALIZADA : Podio + posiciones
+FINALIZADA --> ESPERA : nueva_partida (revancha)\n/ partidaN++
+FINALIZADA --> [*] : salir / sala inactiva purgada
+@enduml

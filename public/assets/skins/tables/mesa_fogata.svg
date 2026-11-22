@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1640" height="800" viewBox="0 0 1640 800"><defs>
+    <radialGradient id="fieltro" cx="50%" cy="42%" r="64%"><stop offset="0" stop-color="#6d6378"/><stop offset=".6" stop-color="#594f64"/><stop offset="1" stop-color="#463e51"/></radialGradient>
+    <linearGradient id="madera" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb196"/><stop offset=".5" stop-color="#e8907a"/><stop offset="1" stop-color="#b96f5f"/></linearGradient>
+    <filter id="tela" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .08 0"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+    <filter id="vetaMadera" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".004 .09" numOctaves="2" seed="12" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0.35  0 0 0 0 0.22  0 0 0 0 0.12  0 0 0 .22 0"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+    <filter id="sombra" x="-10%" y="-10%" width="120%" height="135%"><feDropShadow dx="0" dy="22" stdDeviation="24" flood-color="#5a4636" flood-opacity=".32"/></filter>
+    <filter id="glow" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur stdDeviation="9" result="b1"/><feGaussianBlur stdDeviation="3" result="b2"/><feMerge><feMergeNode in="b1"/><feMergeNode in="b2"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="veta" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".004 .012" numOctaves="5" seed="9" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0"/><feComponentTransfer><feFuncA type="table" tableValues="0 0 0 0 0 1 0 0 0 0 0"/></feComponentTransfer></filter>
+    <linearGradient id="sombraInterior" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a4636" stop-opacity=".22"/><stop offset=".28" stop-color="#5a4636" stop-opacity="0"/></linearGradient>
+  </defs>
+  <g filter="url(#sombra)"><ellipse cx="820" cy="409" rx="800" ry="384" fill="#b96f5f"/></g>
+  <ellipse cx="820" cy="400" rx="800" ry="384" fill="url(#madera)"/>
+  <ellipse cx="820" cy="400" rx="800" ry="384" fill="#000" filter="url(#vetaMadera)"/>
+  <ellipse cx="820" cy="400" rx="800" ry="384" fill="none" stroke="#ffd6c4" stroke-opacity=".6" stroke-width="3"/>
+  <ellipse cx="820" cy="400" rx="794" ry="380" fill="none" stroke="#ffd6c4" stroke-opacity=".9" stroke-width="3" filter="url(#glow)"/><ellipse cx="820" cy="381" rx="746" ry="331" fill="none" stroke="#ffd6c4" stroke-opacity=".85" stroke-width="3" filter="url(#glow)"/>
+  <ellipse cx="820" cy="381" rx="746" ry="331" fill="url(#fieltro)"/>
+  <ellipse cx="820" cy="381" rx="746" ry="331" fill="#000" filter="url(#tela)"/>
+  <ellipse cx="820" cy="381" rx="746" ry="331" fill="url(#sombraInterior)"/>
+  
+  <ellipse cx="820" cy="381" rx="746" ry="331" fill="none" stroke="#ffd6c4" stroke-opacity=".8" stroke-width="3"/>
+  <ellipse cx="820" cy="381" rx="710" ry="295" fill="none" stroke="#ffd6c4" stroke-opacity=".45" stroke-width="2.5" stroke-dasharray="2 12" stroke-linecap="round"/></svg>

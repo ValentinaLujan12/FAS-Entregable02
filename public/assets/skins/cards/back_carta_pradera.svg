@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="392" viewBox="0 0 280 392"><defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a4b5cc"/><stop offset="1" stop-color="#8b9db8"/></linearGradient>
+    <clipPath id="tarjeta"><rect x="3" y="3" width="274" height="386" rx="24"/></clipPath><pattern id="p" width="60" height="60" patternUnits="userSpaceOnUse"><rect width="60" height="8" fill="#fbf4e6" fill-opacity=".5"/><rect y="14" width="60" height="4" fill="#e7c27d" fill-opacity=".55"/><rect y="24" width="60" height="10" fill="#728197" fill-opacity=".35"/><rect y="40" width="60" height="4" fill="#d88e70" fill-opacity=".45"/><path d="M0 52 L6 47 L12 52 L18 47 L24 52 L30 47 L36 52 L42 47 L48 52 L54 47 L60 52" fill="none" stroke="#fbf4e6" stroke-opacity=".55" stroke-width="2"/></pattern></defs>
+  <rect x="3" y="3" width="274" height="386" rx="24" fill="url(#g)"/>
+  
+  <rect x="3" y="3" width="274" height="386" rx="24" fill="none" stroke="#68768a" stroke-opacity=".55" stroke-width="3"/>
+  <rect x="17" y="17" width="246" height="358" rx="15" fill="url(#p)" stroke="#fbf4e6" stroke-width="6"/>
+  <rect x="17" y="17" width="246" height="358" rx="15" fill="none" stroke="#616e81" stroke-opacity=".35" stroke-width="6" stroke-dasharray="3 6"/>
+  <circle cx="140" cy="196" r="62" fill="#7a8aa2" fill-opacity=".55" stroke="#fbf4e6" stroke-width="4"/>
+  <circle cx="140" cy="196" r="52" fill="none" stroke="#fbf4e6" stroke-opacity=".6" stroke-width="2" stroke-dasharray="1 6" stroke-linecap="round"/>
+  <g><g transform="translate(103 159) scale(0.74)" data-m="emblema"><polygon points="50.0,10.0 61.2,36.6 89.9,39.0 68.1,57.9 74.7,86.0 50.0,71.0 25.3,86.0 31.9,57.9 10.1,39.0 38.8,36.6" fill="#fbf4e6" stroke="#fbf4e6" stroke-width="3" stroke-linejoin="round"/><circle cx="50.0" cy="8.0" r="5.5" fill="#fbf4e6"/><circle cx="91.8" cy="38.4" r="5.5" fill="#fbf4e6"/><circle cx="75.9" cy="87.6" r="5.5" fill="#fbf4e6"/><circle cx="24.1" cy="87.6" r="5.5" fill="#fbf4e6"/><circle cx="8.2" cy="38.4" r="5.5" fill="#fbf4e6"/><circle cx="50" cy="52" r="11" fill="#8b9db8" fill-opacity=".9"/></g></g></svg>

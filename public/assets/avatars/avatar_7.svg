@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><defs><clipPath id="c"><circle cx="128" cy="128" r="120"/></clipPath></defs>
+  <circle cx="128" cy="128" r="122" fill="#d9a79a" stroke="#fbf5ea" stroke-width="7"/>
+  <g clip-path="url(#c)">
+    <circle cx="128" cy="128" r="120" fill="#fff" fill-opacity=".14"/>
+    <path d="M40 256 C46 190 92 170 128 170 C164 170 210 190 216 256 Z" fill="#8394ae"/>
+    <path d="M104 172 L128 204 L152 172" fill="#fbf5ea" fill-opacity=".8"/>
+    <circle cx="128" cy="124" r="46" fill="#a87b5d"/>
+    <circle cx="112" cy="128" r="4.5" fill="#5a4636"/><circle cx="144" cy="128" r="4.5" fill="#5a4636"/>
+    <path d="M116 146 Q128 154 140 146" fill="none" stroke="#5a4636" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="104" cy="142" r="7" fill="#e8a08a" fill-opacity=".45"/><circle cx="152" cy="142" r="7" fill="#e8a08a" fill-opacity=".45"/>
+    <path d="M88 92 Q86 58 104 52 Q128 62 152 52 Q170 58 168 92 Z" fill="#9aa0aa"/><path d="M52 94 Q128 116 204 94 Q206 106 192 112 Q128 130 64 112 Q50 106 52 94 Z" fill="#9aa0aa"/><g transform="translate(116 62) scale(.24)"><polygon points="50.0,10.0 61.2,36.6 89.9,39.0 68.1,57.9 74.7,86.0 50.0,71.0 25.3,86.0 31.9,57.9 10.1,39.0 38.8,36.6" fill="#e7c27d" stroke="#e7c27d" stroke-width="3" stroke-linejoin="round"/><circle cx="50.0" cy="8.0" r="5.5" fill="#e7c27d"/><circle cx="91.8" cy="38.4" r="5.5" fill="#e7c27d"/><circle cx="75.9" cy="87.6" r="5.5" fill="#e7c27d"/><circle cx="24.1" cy="87.6" r="5.5" fill="#e7c27d"/><circle cx="8.2" cy="38.4" r="5.5" fill="#e7c27d"/><circle cx="50" cy="52" r="11" fill="#fbf5ea" fill-opacity=".9"/></g>
+  </g></svg>
