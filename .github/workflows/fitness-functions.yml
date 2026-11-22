@@ -1,0 +1,51 @@
+# Pipeline de integración continua del Entregable 3: ejecuta las funciones de idoneidad (fitness functions) del
+# Entregable 2 adaptado (Anexo E.1) en cada push y pull request. Todos los pasos del primer job son BLOQUEANTES.
+name: fitness-functions
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  gobernanza:
+    name: Gobernanza arquitectónica (bloqueante)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Tipos estrictos
+        run: npm run typecheck
+      - name: FF-01 a FF-09, FF-27 - reglas de dependencias (capas, sin ciclos, sin brokers, UI aislada)
+        run: npm run deps
+      - name: Las reglas de dependencias detectan sus violaciones (sondas)
+        run: npm run deps:sondas
+      - name: FF-10 - complejidad ciclomática del núcleo (CC <= 10; CC <= 4 en src/rules)
+        run: npm run cc
+      - name: FF-31 - toda prueba tiene aserciones
+        run: npm run aserciones
+      - name: FF-30 - acoplamiento, abstracción y distancia a la secuencia principal
+        run: npm run metricas
+      - name: Pruebas, idoneidad dinámica (FF-11 a FF-29) y cobertura (FF-15, rules y scoring >= 95 %)
+        run: npm run test:cov
+      - name: Protocolo HTTP de punta a punta (18 verificaciones)
+        run: npm run test:e2e
+      - name: Compilación del cliente
+        run: npm run build
+
+  informativo:
+    name: Complejidad de la interfaz web y los extras (informativo)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: CC <= 10 en src/web y src/extras (no bloquea)
+        run: npm run cc:ui
