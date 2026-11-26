@@ -1,5 +1,6 @@
 # Pipeline de integración continua del Entregable 3: ejecuta las funciones de idoneidad (fitness functions) del
 # Entregable 2 adaptado (Anexo E.1) en cada push y pull request. Todos los pasos del primer job son BLOQUEANTES.
+# g
 name: fitness-functions
 
 on:
