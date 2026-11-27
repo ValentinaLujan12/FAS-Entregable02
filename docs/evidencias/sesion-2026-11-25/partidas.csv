@@ -1,0 +1,3 @@
+id,codigo,partida,modalidad,jugadores,humanos,motivo,rondas,turnos,turno_humano_s,cierres_aceptados,cierres_rechazados,turnos_expirados,servidor_p50_ms,servidor_p95_ms,servidor_p99_ms,cliente_p50_ms,cliente_p95_ms,cliente_p99_ms,muestras_latencia,inicio_col,fin_col
+14,VZCQF,1,CLASICA,6,5,Alcanzó 2 rondas ganadas,2,79,13.1,2,1,1,58,95,170,318,486,874,140,2026-11-25 19:54:38.16842,2026-11-25 20:09:49.747061
+15,JAVB7,1,APUNTADO,6,4,Único jugador activo restante,9,195,13.0,9,4,9,59,111,239,310,446,700,262,2026-11-25 20:13:46.470813,2026-11-25 20:47:01.11099

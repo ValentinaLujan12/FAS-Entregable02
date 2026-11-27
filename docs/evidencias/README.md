@@ -1,7 +1,8 @@
 # Evidencias de las pruebas con usuarios reales (Entregable 3, sección 3)
 
 Esta carpeta guarda la evidencia de las sesiones de validación descritas en el protocolo
-(`docs/evidencias/protocolo-validacion.md`, copia del documento del equipo). **Solo datos reales**: no se completa con datos de ejemplo.
+(`docs/evidencias/protocolo-validacion.md`, copia del documento del equipo). Paso a paso para exportar los datos de
+Supabase y usarlos en el Entregable 03: `GUIA_EXTRACCION_DATOS.md`. **Solo datos reales**: no se completa con datos de ejemplo.
 
 ## Qué guardar
 
@@ -10,6 +11,8 @@ Esta carpeta guarda la evidencia de las sesiones de validación descritas en el 
 | `sesion-AAAA-MM-DD/hoja-registro.md` | Hoja de registro por jugador (U01 a U05): modalidad, tareas T1 a T5, errores, tiempo por turno, SUS y observaciones del guía |
 | `sesion-AAAA-MM-DD/eventos.csv` | Exportación de la tabla `evento` de Supabase para las salas de la sesión (consulta abajo) |
 | `sesion-AAAA-MM-DD/sus.csv` | Respuestas de la encuesta SUS (10 ítems, escala de 1 a 5) por jugador |
+| `sesion-AAAA-MM-DD/encuesta-sus.md` | Las mismas respuestas con el texto de cada ítem, la interpretación y la pregunta abierta |
+| `consentimiento.md` | Texto del consentimiento y registro de aceptación por participante |
 | `sesion-AAAA-MM-DD/capturas/` | Capturas de pantalla o fotos de la sesión (sin rostros si no hay autorización) |
 | `resumen.md` | Tabla consolidada de métricas que va en la sección 3.3 del Entregable 3 |
 

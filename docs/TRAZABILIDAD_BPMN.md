@@ -20,7 +20,7 @@ Generada automáticamente por `npm run bpmn:generate` desde `tools/bpmn/diagrama
 | 02_to_be | Revelar manos y calcular la liquidación de la ronda | RF13, RF17 | RoundScoring | RoundScoring.liquidar (función pura) |
 | 02_to_be | Actualizar el marcador y guardar la sala (versión optimista) | RF14, RF19 | StateRepository | IAlmacen.guardarAtomico -> guardar_sala_atomica (Supabase) |
 | 02_to_be | ¿Fin de partida? | RF15, RF16 | HandEvaluator | IReglaJuego.evaluarPartida |
-| 02_to_be | Pausa de liquidación y nueva ronda | RF17 | TurnOrchestrator | PartidaEnCurso.continuar |
+| 02_to_be | Pausa de liquidación (60 s o todos votan continuar) y nueva ronda | RF17 | TurnOrchestrator | PartidaEnCurso.votarContinuar / continuar |
 | 02_to_be | Declarar al ganador y armar el podio | RF16 | RoundScoring | IReglaJuego.evaluarPartida -> FinalVista |
 | 02_to_be | Ver el podio; el anfitrión decide la revancha | RF18 | Cliente web |  |
 | 03_turno | Fijar la fase y el cronómetro; difundir el estado | RF08, RF18 | TurnOrchestrator | PartidaEnCurso.turnoIniciado (tiempoTurnoMs; 8 s si el jugador está desconectado) |
@@ -52,7 +52,7 @@ Generada automáticamente por `npm run bpmn:generate` desde `tools/bpmn/diagrama
 | 04_cierre_liquidacion | Guardar liquidación, marcador y manos iniciales (versión optimista) | RF14, RF19 | StateRepository | IAlmacen.guardarAtomico -> guardar_sala_atomica / memoria |
 | 04_cierre_liquidacion | Difundir el resultado a todos (buzones + aviso Realtime) | RF18 | TurnOrchestrator | difundirEstado - vistaMesa por jugador en su buzón |
 | 04_cierre_liquidacion | Aplicar eliminaciones por umbral y evaluar el fin de partida | RF15, RF16 | HandEvaluator | IReglaJuego.evaluarPartida |
-| 04_cierre_liquidacion | Pausa de liquidación o "Continuar" | RF17 | TurnOrchestrator | pausaLiquidacionSeg - PartidaEnCurso.continuar |
+| 04_cierre_liquidacion | Pausa de liquidación: 60 s o voto "Continuar" de todos los humanos | RF17 | TurnOrchestrator | pausaLiquidacionSeg - PartidaEnCurso.votarContinuar / continuar |
 | 04_cierre_liquidacion | Preparar la nueva ronda: el ganador inicia con 11 cartas | RF17 | DeckManagement | PartidaEnCurso.iniciarRonda (siguienteIniciaId) |
 | 04_cierre_liquidacion | Determinar posiciones y declarar al ganador | RF16 | RoundScoring | FinalVista.posiciones |
 | 04_cierre_liquidacion | Difundir el podio y habilitar la revancha | RF16, RF18 | TurnOrchestrator | evento PARTIDA_FINALIZADA - nueva_partida |

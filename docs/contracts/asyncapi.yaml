@@ -156,13 +156,13 @@ components:
       summary: Intenta cerrar la ronda con la mano de 11 cartas (fase DESCARTAR)
       payload: { type: object, required: [t], properties: { t: { const: cerrar } } }
     continuar:
-      summary: Salta la pausa de liquidación
+      summary: Voto para empezar la siguiente ronda; con el voto de todos los humanos conectados (los bots no se esperan) empieza sin esperar la pausa
       payload: { type: object, required: [t], properties: { t: { const: continuar } } }
     nueva_partida:
-      summary: Revancha; solo host, tras FINALIZADA
+      summary: Revancha tras FINALIZADA; cualquier humano de la sala la pide y todos vuelven a la misma sala (si el anfitrión salió, quien la pide pasa a ser anfitrión)
       payload: { type: object, required: [t], properties: { t: { const: nueva_partida } } }
     salir:
-      summary: Abandona la sala (en curso -> un bot termina su mano)
+      summary: Abandona la sala (en curso -> un bot termina su mano; si era el último humano, la partida termina por abandono)
       payload: { type: object, required: [t], properties: { t: { const: salir } } }
     cuenta_abrir:
       summary: Abre (o crea) la cuenta ANÓNIMA temporal. MOCKUP de las cuentas reales.
@@ -456,6 +456,7 @@ components:
         detalle: { type: string }
         eliminadosAhora: { type: array, items: { type: string } }
         siguienteEn: { type: integer, nullable: true, description: Epoch ms de la siguiente ronda; null si terminó la partida. }
+        votosContinuar: { type: array, items: { type: string }, description: Humanos que ya votaron continuar. }
         jugadores:
           type: array
           items:

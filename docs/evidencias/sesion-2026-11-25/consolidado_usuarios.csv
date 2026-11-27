@@ -1,0 +1,6 @@
+usuario,nombre,modalidades,partidas,turnos,turno_promedio_s,cierres_validos,cierres_rechazados,logro_cierre_valido,turnos_vencidos,latencia_p50_ms,latencia_p95_max_ms,muestras_latencia
+U01,Antonia,"APUNTADO, CLASICA",2,33,10.9,2,0,true,0,301,420,74
+U02,Juan,"APUNTADO, CLASICA",2,75,13.0,4,3,true,0,307,464,178
+U03,Luisa,CLASICA,1,13,17.2,0,0,false,0,431,655,27
+U04,Nani,"APUNTADO, CLASICA",2,19,10.9,0,0,false,0,295,639,40
+U05,Sebastián,"APUNTADO, CLASICA",2,36,14.6,0,2,false,1,316,418,83

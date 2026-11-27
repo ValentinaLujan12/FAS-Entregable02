@@ -19,7 +19,8 @@ El Entregable 2 supuso un proceso Java persistente (Spring-like, con puertos JDB
 2. **Ejecución:** una función serverless de Vercel (`api/index.ts`) que atiende todas las rutas bajo `/api`. El cliente web se publica como archivos estáticos (`public/`).
 3. **Datos:** Supabase como PostgreSQL 15 (cumple ADR-04). Se accede con `@supabase/supabase-js` desde el servidor; la clave secreta solo existe en Vercel.
 4. **Tiempo real:** Supabase Realtime solo envía avisos de cambio; el estado se consulta al servidor.
-5. **Acceso público:** la clave pública del navegador no tiene permisos sobre las tablas (RLS activo sin políticas).
+5. **Acceso público:** la clave pública del navegador no tiene permisos sobre las tablas (RLS activo sin políticas, y permisos explícitos solo para el rol del servidor).
+6. **Región:** la función corre en la misma región que la base de datos (`"regions": ["pdx1"]` en `vercel.json`, junto a Supabase `us-west-2`). Si el proyecto de Supabase se crea en otra región, se cambia esa línea por la región de Vercel más cercana (ver la nota de corrección de ADR-12).
 
 **ALTERNATIVAS RECHAZADAS:**
 

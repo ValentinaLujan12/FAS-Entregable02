@@ -50,8 +50,8 @@ O --> PR : mensajes por jugador (vista proyectada, sin manos ajenas)
 PR -> A : guardarAtomico(sala, versión, buzones, eventos)
 alt versión vigente y cierre único por partida y ronda
   A --> PR : true (una sola transacción)
-  PR -> R : avisarCambio(codigo)  - después de guardar
   PR --> J : mensajes + estado (LIQUIDACION o FINALIZADA)
+  PR -> R : avisarCambio(codigo, origen)  - después de responder (waitUntil)
 else otra petición escribió antes (versión vieja o cierre repetido)
   A --> PR : false (no escribe nada)
   PR -> PR : reintenta sobre el estado nuevo (ADR-07)

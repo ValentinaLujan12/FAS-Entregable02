@@ -1,0 +1,5 @@
+usuario,nombre,modalidad,jugadas,cliente_p50_ms,cliente_p95_ms,cliente_p99_ms
+U01,Antonia,APUNTADO,46,298,420,449
+U02,Juan,APUNTADO,148,308,464,704
+U04,Nani,APUNTADO,13,293,639,741
+U05,Sebastián,APUNTADO,55,318,418,576

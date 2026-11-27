@@ -14,17 +14,18 @@ actor "Otros jugadores" as O
 
 == Robar ==
 J -> C : clic en mazo / pozo
+C -> C : mazo al 50 % de saturación\n(pendiente hasta la respuesta)
 C -> W : POST /api/juego {t:"robar", origen:"MAZO"}
-W -> R : leerSala (con versión)
+W -> R : leerSala (con versión) ‖ presencias ‖ cuenta (en paralelo)
 W -> S : montarExacta + recibir(conn, msg)
 activate S
 S -> P : robar(jugadorId, origen)
 P --> S : ok + eventos [CARTA_ROBADA]
 W -> R : guardarAtomico(sala, versión, buzones, eventos)\nsi otra petición ganó: se repite sobre el estado nuevo
 note right of R : Buzón de los demás: {t:"eventos"}\nsin identidad de la carta si viene del mazo
-W -> RT : avisarCambio(codigo) - después de guardar
-W --> C : {t:"eventos"} + {t:"estado", vista} (mano de 11)
-RT --> O : aviso "cambio": piden su buzón ({t:"estado"}, numCartas+1)
+W --> C : {t:"eventos"} + {t:"estado", vista} (mano de 11)\nla carta queda donde se soltó en la mano
+W -> RT : avisarCambio(codigo, origen) - después de responder (waitUntil)
+RT --> O : aviso "cambio": piden su buzón ({t:"estado"}, numCartas+1)\n(la pestaña de origen ignora su propio eco)
 deactivate S
 
 == Agrupar (asistencia opcional) ==
@@ -38,6 +39,7 @@ note right of C : El servidor NO guarda los grupos:\nson ayuda visual del client
 
 == Descartar y ceder turno ==
 J -> C : arrastra carta al pozo
+C -> C : la carta se ve ya en el pozo, desaturada\n(vuelve a la mano si el servidor la rechaza)
 C -> W : POST /api/juego {t:"descartar", cartaId}
 W -> S : recibir
 S -> P : descartar(jugadorId, cartaId)
@@ -45,9 +47,9 @@ P -> P : pasarTurno() (turnoN++, venceEn)
 P --> S : ok + eventos [CARTA_DESCARTADA, TURNO_INICIADO]
 S -> T : programar(tiempo, expirarTurno(turnoN))\n(se guarda como proximoEn; vence en la petición que llegue después)
 W -> R : guardarAtomico(sala, versión, buzones, eventos)
-W -> RT : avisarCambio(codigo)
 W --> C : eventos + estado
+W -> RT : avisarCambio(codigo, origen) - en segundo plano
 opt siguiente jugador es bot
-  S -> T : programar(retardoBot, decidirAccionBot, "bot")\n(se ejecuta en la misma petición con reloj virtual)
+  S -> T : programar(inicio de fase + espera, decidirAccionBot, "bot")\n(espera natural: robar 0,5–2 s, descartar 1–3 s; proximoEn = hora del bot,\nel cliente vuelve a llamar entonces y el bot juega a su hora)
 end
 @enduml

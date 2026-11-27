@@ -1,0 +1,19 @@
+FF-32 calculado solo con las 2 partidas de la sesion del 25/11/2026 (partida_registro 14 y 15),
+con la funcion evaluarFF32 de tools/ff32-latencia-produccion.ts. Linea base: 300 ms (p99 por partida).
+
+{
+  "estado": "ALERTA",
+  "partidas": 2,
+  "muestras": 402,
+  "lineaBaseMs": 300,
+  "servidor": {
+    "medianaMs": 204.5,
+    "peorMs": 239,
+    "partidasSobreLineaBase": 0
+  },
+  "cliente": {
+    "medianaMs": 787,
+    "peorMs": 874,
+    "partidasSobreLineaBase": 2
+  }
+}

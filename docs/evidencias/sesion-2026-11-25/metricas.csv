@@ -1,0 +1,3 @@
+modalidad,partidas,turno_humano_promedio_s,servidor_p50_ms,servidor_p95_ms,cliente_p50_ms,cliente_p95_ms,cierres_aceptados,cierres_rechazados,turnos_expirados,servidor_p99_ms,cliente_p99_ms
+APUNTADO,5,29.4,164,226,382,454,21,22,11,273,552
+CLASICA,10,13.2,105,180,404,491,12,4,10,216,551

@@ -24,7 +24,13 @@ Funciones y ajustes pendientes del juego. Cada punto indica qué se necesita par
 - **Dónde sí hay consumo:** cuando alguien tiene una sala abierta. Con Realtime activo, el navegador consulta al servidor unas dos veces por minuto (cada 6 latidos de 1,5 s, es decir, cada 9 s). Si Realtime no está disponible, consulta cada 1,5 s.
 - **Mejora propuesta:** dejar de consultar al servidor cuando la pestaña está oculta o cuando el jugador lleva varios minutos sin actuar, y reanudar al volver. Así una pestaña olvidada abierta no genera peticiones.
 
-### 4. Usuario administrador para banear jugadores
+### 4. Agrupar en una sola petición los clics acumulados
+
+- **Qué:** cuando el jugador pulsa varias veces seguidas (por ejemplo, 5 veces "agregar bot" y después "iniciar"), el navegador hoy envía una petición por clic, una tras otra. Se podrían enviar juntas las que se acumulan mientras la anterior está en vuelo, y que el servidor las aplique en un solo intento y una sola escritura.
+- **Qué se necesita:** que la petición acepte una lista de mensajes (cambio del contrato `openapi.yaml`), que el procesador los aplique en orden dentro del mismo intento y que la respuesta incluya los mensajes de todos.
+- **Por qué no se hizo aún:** con la función en la misma región que la base de datos y los demás ajustes de la nota de corrección de ADR-12, cada comando ya responde en una fracción de segundo; conviene medir primero con usuarios reales.
+
+### 5. Usuario administrador para banear jugadores
 
 - **Qué:** un usuario con permisos para banear y desbanear a otros jugadores desde la web.
 - **Forma de crear usuarios:** por ahora se sigue con el método actual, `herramientas/generar-acceso.html` y las variables de Vercel. Se revisará más adelante.

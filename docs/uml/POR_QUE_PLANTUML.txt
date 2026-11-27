@@ -1,0 +1,46 @@
+POR QUÉ LOS DIAGRAMAS UML ESTÁN EN PLANTUML Y NO EN DRAW.IO
+=========================================================
+
+Los 11 diagramas UML del proyecto se escriben como texto en PlantUML
+(archivos .puml de esta carpeta). Las imágenes de la carpeta render/
+(.png y .svg) se generan a partir de ellos. Se eligió este formato en
+lugar de draw.io por tres razones:
+
+1. Verificación automática
+   Hay una comprobación (npm run uml:verificar, incluida en npm run
+   verify y en el pipeline de GitHub Actions) que lee los .puml y
+   confirma que todos los métodos que nombran los diagramas existen en
+   el código (src/) o en el esquema de la base de datos
+   (supabase/esquema.sql). Si alguien cambia el nombre de un método y
+   no actualiza el diagrama, el pipeline falla. Con draw.io esa
+   comprobación deja de funcionar, porque el contenido queda guardado
+   como figuras dentro de un XML, y los diagramas podrían quedar
+   desactualizados sin que nadie lo note.
+
+2. Historial legible
+   Un cambio en un .puml se ve en Git como una línea de texto (por
+   ejemplo, "guardar(...)" pasa a "guardarAtomico(...)"), y se puede
+   revisar en un pull request como cualquier cambio de código. En
+   draw.io el archivo es un XML con coordenadas, estilos y
+   identificadores internos; un cambio pequeño produce un diff grande y
+   difícil de revisar.
+
+3. Regeneración
+   Con PlantUML un solo comando (npm run uml:render) vuelve a generar
+   las imágenes de los 11 diagramas. En draw.io cada cambio se hace a
+   mano, diagrama por diagrama, y luego hay que exportar cada imagen.
+
+DesventajA: PlantUML acomoda las cajas y flechas automáticamente,
+así que hay menos control sobre la posición exacta y la estética que
+en draw.io.
+
+Cómo ver y editar
+-----------------
+- Ver: abrir los .png o .svg de render/ (los .svg se ven mejor en el
+  navegador).
+- Editar: VS Code con la extensión "PlantUML" (vista previa con
+  Alt+D), o pegar el contenido en plantuml.com. Todos los .puml
+  incluyen _estilo.iuml; fuera del repositorio hay que quitar esa
+  línea o pegar su contenido.
+- Después de editar: npm run uml:render (imágenes) y
+  npm run uml:verificar (alineación con el código).

@@ -15,13 +15,13 @@ cloud "Vercel" as VER {
   node "CDN de estáticos" as CDN {
     artifact "public/" as PUB
   }
-  node "Función Node 22\n(api/index.ts, máx. 30 s)" as FN {
+  node "Función Node 22\n(api/index.ts, máx. 30 s)\nregión pdx1 (Oregón)" as FN {
     artifact "Procesador\n+ TurnOrchestrator\n+ ProgramadorVirtual" as PROC
     artifact "Variables de entorno:\nACCESO_USUARIOS (hash)\nSECRETO_SESION\nSUPABASE_URL\nSUPABASE_SECRET_KEY\nSUPABASE_PUBLISHABLE_KEY" as ENV
   }
 }
 
-cloud "Supabase" as SB {
+cloud "Supabase (us-west-2, Oregón)" as SB {
   database "PostgreSQL\nsala, buzon, presencia, cuenta,\nlimite, evento (RLS)\npartida_registro (+ por jugador)\nguardar_sala_atomica()\ntr_registrar_partida" as PG
   node "Realtime\n(difusión sala-<CODIGO>)" as RT
 }
@@ -29,13 +29,13 @@ cloud "Supabase" as SB {
 REPO --> VER : despliegue automático\nen cada push
 SPA --> CDN : HTTPS (estáticos)
 SPA --> FN : HTTPS POST /api/juego\n(intención o sincronización)
-FN --> PG : HTTPS (supabase-js,\nclave secreta)
-FN --> RT : aviso de cambio
+FN --> PG : HTTPS (supabase-js, clave secreta)\nmisma región: pocos ms por consulta
+FN --> RT : aviso de cambio\n(después de responder, waitUntil)
 RT ..> SPA : WSS (solo aviso,\nsin datos del juego)
 
 note bottom of FN
-  Cada petición: leer sala -> reconstruir -> presencia ->
-  mensaje -> reloj al día (plazos y bots) -> guardar con versión ->
-  buzones de los demás. No guarda IPs.
+  Cada petición: leer sala, presencias y cuenta (en paralelo) -> reconstruir ->
+  mensaje -> reloj al día (plazos y bots) -> guardar con versión -> responder.
+  Latido propio y aviso por Realtime después de responder. No guarda IPs.
 end note
 @enduml

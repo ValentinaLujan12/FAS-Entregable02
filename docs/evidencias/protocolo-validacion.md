@@ -1,7 +1,7 @@
 # Protocolo de validación con usuarios reales (Entregable 3, sección 3.1)
 
-**Estado:** diseño listo (revisado el 22/11/2026: la tabla `evento` ya existe en el esquema). Las sesiones NO se han realizado. Los resultados se registrarán solo con datos reales.
-**Responsable de sesiones:** equipo (2 guías). **Fecha:** abierta (por definir).
+**Estado:** ejecutado. Sesión piloto S0 el 23/11/2026 y sesión formal S1 el 25/11/2026 (19:30 a 20:50). Resultados en `resumen.md` y en las carpetas `sesion-2026-11-23/` y `sesion-2026-11-25/`.
+**Responsable de sesiones:** equipo (2 guías, G1 y G2).
 
 ## 1. Población
 
@@ -89,8 +89,9 @@ Además se exporta el resumen de cada partida: `select * from partida_registro w
 
 Los resultados se descargan como CSV (botón Export) y se guardan en `docs/evidencias/sesion-<fecha>/` del repositorio, sin datos personales. La plantilla de esa carpeta y el cálculo de métricas y del SUS están en `docs/evidencias/README.md`.
 
-## 8. Pendientes de este protocolo
+## 8. Ejecución
 
-- Definir fecha y lugar de las sesiones.
-- Confirmar el formato de consentimiento (impreso o formulario).
-- Ejecutar las sesiones y completar las tablas 3.2 a 3.4 del Entregable 03.
+- Fechas: S0 el 23/11/2026 y S1 el 25/11/2026.
+- Consentimiento: aceptado de forma verbal por los cinco usuarios y registrado en `consentimiento.md`.
+- Resultados: Tablas 3.2 a 3.4 del Entregable 03; consolidado en `resumen.md`.
+- Exportación: hecha con `GUIA_EXTRACCION_DATOS.md` (ventana de S1: 19:15 a 21:05, hora de Colombia).

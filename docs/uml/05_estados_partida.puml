@@ -15,10 +15,12 @@ state EN_CURSO {
 }
 
 EN_CURSO --> LIQUIDACION : cierre aceptado\n∨ tablas (reciclajes agotados)
-LIQUIDACION : Pantalla de puntajes\nauto-continúa (pausaLiquidacionSeg)
-LIQUIDACION --> EN_CURSO : continuar\n[evaluarPartida: no finalizada]\n/ nueva ronda
+LIQUIDACION : Pantalla de puntajes (60 s)\nlos bots ya están listos
+LIQUIDACION --> EN_CURSO : todos los humanos conectados votan continuar\n∨ vence pausaLiquidacionSeg\n[evaluarPartida: no finalizada] / nueva ronda
 LIQUIDACION --> FINALIZADA : evaluarPartida: finalizada\n∨ un solo activo
+EN_CURSO --> EN_CURSO : sin humanos conectados\n/ pausa (plazos congelados);\nvuelve alguien antes de 5 min / plazos corridos
+EN_CURSO --> FINALIZADA : nadie vuelve en 5 min ∨ sale el último humano\n/ PARTIDA_FINALIZADA (abandono)
 FINALIZADA : Podio + posiciones
-FINALIZADA --> ESPERA : nueva_partida (revancha)\n/ partidaN++
+FINALIZADA --> ESPERA : nueva_partida (revancha, cualquier humano)\n/ partidaN++, todos vuelven a la sala
 FINALIZADA --> [*] : salir / sala inactiva purgada
 @enduml

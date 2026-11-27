@@ -11,10 +11,16 @@ database "Supabase" as DB
 
 == Presencia (cada 1,5 s) ==
 C -> P : POST {codigo, token}
-P -> DB : leer sala + presencias
-P -> DB : tocar presencia del jugador
+P -> DB : leer sala ‖ presencias (en paralelo)
 P -> DB : sacar buzón
 P --> C : {ahora, mensajes[], proximoEn}
+P -> DB : tocar presencia del jugador (después de responder)
+
+== Abandonar ==
+J -> C : "Abandonar"
+C -> P : POST {codigo, token, msg:{t:"salir"}}\n(con el código y el token guardados al pulsar)
+C -> C : vacía la fila y descarta lo que llegue de esa sala
+P -> S : salir: si era el último humano,\nfinalizarPorAbandono() (no sigue entre bots)
 
 == Pérdida de conexión ==
 C -x P : el jugador deja de consultar
@@ -22,6 +28,7 @@ note over P : Ninguna petición lo ve en 30 s
 P -> S : desconectar(jugador) (en la siguiente petición de otro jugador)
 S -> S : setConectado(false)\ntiempoTurnoMs() usa tiempoTurnoDesconectadoSeg
 P -> DB : guardarAtomico(sala, versión, buzones de los demás, eventos)
+note over P,S : Si NINGÚN humano sigue conectado, la partida queda en pausa:\nlas peticiones que lleguen no hacen vencer plazos.
 
 == Reconexión ==
 J -> C : recarga la página
@@ -33,6 +40,10 @@ P -> S : recibir {t:"reconectar", codigo, token}
 S -> L : reconectar(codigo, token)
 L -> L : SHA-256(token) == tokenHash ?
 alt token válido
+  opt la partida estuvo en pausa sin humanos
+    P -> S : reanudarTrasPausa(pausa, 5 min)
+    S -> S : pausa < 5 min: desplazarPlazos(pausa)\npausa >= 5 min: finalizarPorAbandono()\n(PARTIDA_FINALIZADA, queda en las métricas)
+  end
   S --> P : {t:"sesion"}, {t:"estado", vista} (solo SU mano)
   P -> DB : guardarAtomico(sala, versión)
   P --> C : mensajes

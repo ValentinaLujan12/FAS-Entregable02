@@ -155,6 +155,7 @@ paths:
                 clave: { type: string, description: Clave anónima de la cuenta de skins }
                 vista: { type: boolean, description: El cliente acaba de cargar y necesita la vista completa }
                 rttMs: { type: integer, minimum: 0, maximum: 60000, description: Ida y vuelta de la petición anterior medida por el navegador (ms). Solo para las métricas de latencia }
+                origen: { type: string, maxLength: 40, description: Identificador aleatorio de la pestaña; viaja en el aviso de Realtime para que esa pestaña ignore su propio eco }
                 msg: { type: object, description: Mensaje cliente->servidor discriminado por `t` }
       responses:
         '200':

@@ -61,6 +61,7 @@ class Valoracion {
 }
 interface IServicioPuntaje <<pPuntaje: game -> scoring>> {
   +liquidarRonda(entrada : EntradaLiquidar) : ResultadoLiquidacion
+  +posicionesPorAbandono(regla, marcador, todos) : {ganadorId, posiciones}
 }
 class RoundScoring {
   +posiciones(regla, marcador, todos, ganadorId)

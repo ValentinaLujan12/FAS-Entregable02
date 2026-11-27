@@ -20,8 +20,8 @@ Cada jugada (robar, descartar, cambiar de turno, cerrar ronda) modifica el estad
 
 1. **Cambio: orquestador por comando.** Cada comando del jugador (o el vencimiento de un turno) se procesa en una sola ejecución: carga la sala desde Supabase con su versión, aplica el comando mediante el orquestador, y persiste el resultado con ***IAlmacen.guardarAtomico*** (función SQL `guardar_sala_atomica`). El orquestador sigue siendo el único módulo que coordina `deck`, `player`, `rules`, `scoring` y `persistence`; ningún módulo de negocio llama a otro.
 2. **Cambio: serialización por versión, no por cola en memoria.** El orden de los comandos de una sala lo garantiza el control de versión optimista (ADR-07). Si dos comandos compiten, el segundo falla con conflicto y se reintenta sobre el estado nuevo.
-3. **Cambio: persistencia y eventos en la misma escritura.** Los eventos del comando (`EventoJuego`, snapshot inmutable del Shared Kernel) se guardan en la misma llamada de base de datos que el estado (ADR-07). Los mensajes de cada jugador (estado y eventos filtrados por `ProyectorVistaJugador`) también se guardan en esa escritura, en su buzón. Solo después de que la escritura confirma se llama a ***ICanalTiempoReal***.avisarCambio(codigo): el aviso no lleva datos del juego y cada cliente recoge su buzón.
-4. **Sin cambio: temporizador.** ***ITemporizadorTurno*** no conserva estado propio: el reloj de vencimiento se guarda en la sala (`proximo_en`) y lo procesa el mismo flujo de comandos al llegar una petición o un latido.
+3. **Cambio: persistencia y eventos en la misma escritura.** Los eventos del comando (`EventoJuego`, snapshot inmutable del Shared Kernel) se guardan en la misma llamada de base de datos que el estado (ADR-07). Los mensajes de cada jugador (estado y eventos filtrados por `ProyectorVistaJugador`) también se guardan en esa escritura, en su buzón. Solo después de que la escritura confirma, y ya respondida la petición, se llama a ***ICanalTiempoReal***.avisarCambio(codigo, origen): el aviso no lleva datos del juego, cada cliente recoge su buzón y la pestaña que provocó el cambio no vuelve a pedir nada (ADR-12).
+4. **Sin cambio: temporizador.** ***ITemporizadorTurno*** no conserva estado propio: el próximo plazo (fin de turno, votación, pausa o jugada de un bot) se guarda en la sala (`proximo_en`) y lo procesa el mismo flujo de comandos al llegar una petición o un latido, sin adelantarse a la hora real (ADR-13).
 5. **Sin cambio: aislamiento de fallos.** Si la difusión falla, el estado ya confirmado no se revierte; el cliente se resincroniza al consultar el estado persistido.
 6. **Cambio: transporte hacia los clientes.** Los clientes reciben el estado por consulta periódica al servidor (cada 1,5 s; cada 9 s cuando Supabase Realtime avisa de cambios). Ya no hay conexiones WebSocket propias. El contrato de eventos se documenta como OpenAPI (peticiones) y AsyncAPI (eventos de Realtime).
 
@@ -37,7 +37,7 @@ Cada jugada (robar, descartar, cambiar de turno, cerrar ronda) modifica el estad
 
 **Positivas:** el estado y los eventos son coherentes entre sí; las pruebas siguen siendo deterministas porque el orquestador recibe sus dependencias por interfaz; el juego corre sin servidor persistente.
 
-**Negativas:** cada comando paga la lectura y la escritura en base de datos; la latencia percibida depende de Supabase; el cliente ve los cambios con retraso de hasta 9 s si Realtime falla.
+**Negativas:** cada comando paga una lectura (sala, presencias y cuenta en paralelo) y una escritura en base de datos; la latencia percibida depende de la distancia a Supabase, por eso la función corre en la misma región (ADR-06); el cliente ve los cambios con retraso de hasta 9 s si Realtime falla.
 
 **CUMPLIMIENTO (COMPLIANCE):**
 

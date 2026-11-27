@@ -71,6 +71,9 @@ package "game" {
     +cerrar(jugadorId)
     +expirarTurno(turnoN)
     +continuar()
+    +votarContinuar(id)
+    +desplazarPlazos(ms)
+    +finalizarPorAbandono()
     +setConectado(id, bool)
     +abandonar(id)
     +snapshot() : EstadoPartida
